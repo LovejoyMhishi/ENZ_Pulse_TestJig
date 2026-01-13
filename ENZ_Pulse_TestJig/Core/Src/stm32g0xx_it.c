@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "adc.h"
+#include "app.h"
 
 /* USER CODE END Includes */
 
@@ -146,16 +147,19 @@ void SysTick_Handler(void)
 void DMA1_Channel1_IRQHandler(void)
 {
 	if (DMA1->ISR & DMA_ISR_TCIF1) {      //Transfer Complete flag
-		DMA1->IFCR = DMA_IFCR_CTCIF1;     //Clear the flag
-		//ADC_Stop_DMA(ADC1);              //Stop ADC
+		DMA1->IFCR = DMA_IFCR_CTCIF1;     //Clear the flag // DMA1->IFCR = DMA_IFCR_CGIF1; aLL FLAgs
 		ADC_Cmplt = true;
-		//ENZ_PULSE_DataProc();
-
-
-
 	}
 }
 
+void ADC1_IRQHandler(void) {
+	if (READ_BIT(ADC1->ISR, ADC_ISR_AWD1)) {
+
+		SET_BIT(ADC1->ISR, ADC_ISR_AWD1);
+		ENZ.PULSE_CNT++;
+		// Handle out-of-range condition here
+	}
+}
 
 //void SysTick_Handler(void){
 //

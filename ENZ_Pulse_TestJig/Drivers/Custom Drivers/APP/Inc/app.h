@@ -1,9 +1,3 @@
-/*
- * app.h
- *
- *  Created on: Jan 7, 2026
- *      Author: Lovejoy
- */
 
 /* ******************* ──────────────────────────────────────────────────────────────── ******************* */
 /*                                                                                                          *
@@ -49,29 +43,34 @@
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 
 typedef struct{
-	uint16_t PULSE[200];
+	uint16_t PULSE[400];
 	uint16_t V_Peak;
+	uint16_t I_Peak;
 	uint16_t ADC_Peak;
 	uint8_t  Buff_Num;
+	uint8_t PULSE_CNT;
+	bool PulseActive;
 }Energizer;
 
 
 typedef enum {
-	NO_PULSE = 0,
+	SCAN = 0,
     FIRST_PULSE ,
     SECOND_PULSE
-} ENZ_PULSE;
+} ENZ_TST_JIG ;
 
 
 
 
-extern Energizer ENZ;                       // Declare ENZ
+extern volatile Energizer ENZ;                       // Declare ENZ
 
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
 /*                                           HIGH-LEVEL FUNCTIONS                                           */
 /*																										    */
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
+
+void ENZ_PULSE_EVENTS(void);
 void ENZ_PULSE_Detector(void);
 void ENZ_PULSE_DataProc(void);
 

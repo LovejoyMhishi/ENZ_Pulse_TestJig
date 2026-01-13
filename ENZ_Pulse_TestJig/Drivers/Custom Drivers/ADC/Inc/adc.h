@@ -64,6 +64,8 @@ extern bool ADC_Cmplt;
 void ADC1_Init(void);
 void ADC1_Start(void);
 void ADC1_Stop(void);
+
+void ADC_AWD_Thrds_Config(void);
 uint16_t ADC1_Read(void);
 #endif /* CUSTOM_DRIVERS_ADC_INC_ADC_H_ */
 

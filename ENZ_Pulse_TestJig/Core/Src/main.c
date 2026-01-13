@@ -48,6 +48,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+uint16_t adc_buffer[200];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -90,13 +91,16 @@ int main(void)
 
 	/* USER CODE BEGIN SysInit */
 
+	ADC_AWD_Thrds_Config();
 	/* USER CODE END SysInit */
 
 	/* Initialize all configured peripherals */
 	/* USER CODE BEGIN 2 */
+
 	ADC1_Start();
-	//ADC_Start_DMA(ADC1, DMA1_Channel1, (uint32_t*)adc_buffer, 200);
 	GPIO_Writepin(GPIOA, LED_3, GPIO_PIN_SET);
+	//    ADC_Start_DMA(ADC1, DMA1_Channel1, (uint32_t*)ENZ_Out_V, 200);
+
 
 	/* USER CODE END 2 */
 
@@ -106,6 +110,8 @@ int main(void)
 	{
 		ENZ_PULSE_Detector();
 		ENZ_PULSE_DataProc();
+
+		//uint16_t ADC_DATA = ADC1->DR;
 
 		/* USER CODE END WHILE */
 
