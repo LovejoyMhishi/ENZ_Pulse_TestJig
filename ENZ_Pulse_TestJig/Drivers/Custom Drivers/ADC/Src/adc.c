@@ -190,22 +190,23 @@ uint16_t ADC1_Read(void){
 void ADC_AWD_Thrds_Config(void) {
 	SET_BIT(ADC1->CFGR1, ADC_CFGR1_AWD1EN);                       //1: Analog watchdog 1 EN
 	SET_BIT(ADC1->CFGR1, ADC_CFGR1_AWD1SGL);                      //1: Analog watchdog 1 EN on a single channel
-	CLEAR_BIT(ADC1->CFGR1, ADC_CFGR1_AWD1CH);                      //00000: ADC analog input Channel 0 monitored by AWD
+	CLEAR_BIT(ADC1->CFGR1, ADC_CFGR1_AWD1CH);                     //00000: ADC analog input Channel 0 monitored by AWD
 
 
 	WRITE_REG(ADC1->AWD1TR, ADC_AWD1TR_HT1_10);                   //1024 HTx THR
-	SET_BIT(ADC1->IER, ADC_IER_AWD1IE);                            //Analog watchdog 1 interrupt enable
+	SET_BIT(ADC1->IER, ADC_IER_AWD1IE);                           //Analog watchdog 1 interrupt enable
 
 	/*
 	 * Enable NVIC IRQ
 	 */
-	HAL_NVIC_SetPriority(ADC1_IRQn, 3, 1);
-	HAL_NVIC_EnableIRQ(ADC1_IRQn);
+	NVIC_SetPriority(ADC1_IRQn, 3);
 
 }
 
 void  ADC_AWD_Thrds_Clear(void) {
-	CLEAR_BIT(ADC1->CFGR1, ADC_CFGR1_AWD1EN);                       //1: Analog watchdog 1 EN
-	CLEAR_BIT(ADC1->CFGR1, ADC_CFGR1_AWD1SGL);                      //1: Analog watchdog 1 EN on a single channel
+	ADC1_Stop();
+	CLEAR_BIT(ADC1->CFGR1, ADC_CFGR1_AWD1EN);                       //0: Analog watchdog 1 Disable
+	CLEAR_BIT(ADC1->CFGR1, ADC_CFGR1_AWD1SGL);                      //0: Analog watchdog 1 EN on a single channel
+	NVIC_DisableIRQ(ADC1_IRQn);
 }
 

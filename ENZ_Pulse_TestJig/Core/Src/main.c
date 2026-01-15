@@ -48,7 +48,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint16_t adc_buffer[200];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -83,6 +83,7 @@ int main(void)
 	ADC1_Init();
 	DMA1_Init();
 	TIM3_Init();
+	TIM14_Init();
 	USART_Init();
 	/* USER CODE END Init */
 
@@ -101,15 +102,16 @@ int main(void)
 	GPIO_Writepin(GPIOA, LED_3, GPIO_PIN_SET);
 	//    ADC_Start_DMA(ADC1, DMA1_Channel1, (uint32_t*)ENZ_Out_V, 200);
 
-
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1)
 	{
-		ENZ_PULSE_Detector();
-		ENZ_PULSE_DataProc();
+		//		ENZ_PULSE_Detector();
+		//		ENZ_PULSE_DataProc();
+
+		ENZ_PULSE_EVENTS();
 
 		//uint16_t ADC_DATA = ADC1->DR;
 

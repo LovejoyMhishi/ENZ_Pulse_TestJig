@@ -34,6 +34,7 @@
 #include "stm32g030xx.h"
 #include "stm32g0xx_hal.h"
 
+
 void TIM3_Init(void) {
 
 
@@ -44,7 +45,7 @@ void TIM3_Init(void) {
 
 
 
-	WRITE_REG(TIM3->PSC,15);
+	WRITE_REG(TIM3->PSC, 15);
 
 	WRITE_REG(TIM3->ARR, 1999);
 	WRITE_REG(TIM3->CCR1, 1000);                                   //Duty (%) = CCR / (ARR + 1)
@@ -59,6 +60,29 @@ void TIM3_Init(void) {
 
 	SET_BIT(TIM3->EGR, TIM_EGR_UG);                               // Force update event
 
-	//SET_BIT(TIM3->CR1, TIM_CR1_CEN);                            // Start timer
+}
+
+void TIM14_Init(void) {
+
+
+	CLEAR_BIT(TIM14->CR1, TIM_CR1_CEN);                            //Ensure that the Timer's Counter is OFF
+	SET_BIT(RCC->APBENR2, RCC_APBENR2_TIM14EN);                    // TIM14 timer clock enable
+
+	WRITE_REG(TIM14->PSC, 63999);
+	WRITE_REG(TIM14->ARR, 4999);
+	SET_BIT(TIM14->EGR, TIM_EGR_UG);                               //Force update event
+	CLEAR_BIT(TIM14->SR,  TIM_SR_UIF);
+	SET_BIT(TIM14->CR1, TIM_CR1_ARPE | TIM_CR1_OPM);               //ARPE & OPM EN
+	SET_BIT(TIM14->DIER, TIM_DIER_UIE);                            //Update interrupt EN
+
+
+	/*
+	 * Enable NVIC IRQ
+	 */
+	NVIC_SetPriority(TIM14_IRQn, 2);
+	NVIC_EnableIRQ(TIM14_IRQn);
 
 }
+
+
+

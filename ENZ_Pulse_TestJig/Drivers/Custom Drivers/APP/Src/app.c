@@ -33,18 +33,35 @@
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 #include "app.h"
 #include "dma.h"
+#include "tim.h"
 #include "stdlib.h"
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
 /*                                           VARIABLES                                                      */
 /*																										    */
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
-volatile Energizer ENZ;
-ENZ_TST_JIG EVENT = SCAN;
 
+volatile Energizer ENZ = {
+		.PULSE = {0},
+		.V_Peak = 0,
+		.I_Peak = 0,
+		.Energy_J =0,
+		.ADC_Peak = 0,
+		.Buff_Num = 0,
+		.PULSE_CNT = 0,
+		.PULSE_Width = 0,
+		.PULSE_T = 0,
+		.PulseActive = false,
+		.Buff_Full = false
+};
+
+ENZ_TST_JIG EVENT = SCAN;
+bool One_Sec_Elapsed = false;
+
+uint8_t Sec = 0;
 static uint8_t ADCSampleCnt;
-static const double T_Sample = 0.78125e-6f;                  //Total Time per sample:(12.5 + 12.5)(1/f_adc )
-static double Pulse_Duration;
+
+
 
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
@@ -59,41 +76,27 @@ static double Pulse_Duration;
  * ────────────────────────────────────────────────────────────── */
 
 void ENZ_PULSE_Detector(void) {
-	if(ADC1->DR >= 50 ) {
-
+	if(ADC1->DR >= 50  && !ENZ.PulseActive) {
 		ADC_Start_DMA(ADC1, DMA1_Channel1, (uint32_t*)ENZ.PULSE, 400);
-		//ADC1_Stop();
-		ADC_Cmplt = true;
-
-
+		TIMx_Start(TIM14);
+		ENZ_PULSE_Counting();
+		ENZ.PulseActive = true;
 	}
-
 }
 
 
-void ENZ_PULSE_Interval(void) {
-
-	//	if(ADC1->DR <= 124 &&  ADC_Strtd ) {
-	//		//if(PULSE CNT)
-	//	}
-}
 void ENZ_PULSE_DataProc(void) {
 	if(ADC_Cmplt) {
-
-		ADCSampleCnt = 0;
-		ENZ.ADC_Peak = 0;
-		Pulse_Duration = 0;
-
-		if((ENZ.PULSE[199] > 124))  {
+		if((ENZ.PULSE[399] > 50))  {
 			/*
 			 * If the buffer is full and
 			 */
-			ADC1_Start();
+			//ADC1_Start();
 
 		}
-		for (int var = 0; var < 200; ++var) {
+		for (int var = 0; var < 400; ++var) {
 
-			if(ENZ.PULSE[var] <= 124) {
+			if(ENZ.PULSE[var] <= 50) {
 				break;
 			}
 
@@ -103,17 +106,12 @@ void ENZ_PULSE_DataProc(void) {
 
 			ADCSampleCnt++;
 		}
-		Pulse_Duration = ADCSampleCnt*T_Sample;
+		ENZ.PULSE_Width = ADCSampleCnt*ENZ_PULSE_SAMPLE_TIME_s ;
 
 		//DEBUG_ENZ();
 
 		ADC_Cmplt = false;
-		ADC1_Start();
-
-
-
 	}
-
 }
 
 
@@ -121,22 +119,23 @@ void ENZ_PULSE_EVENTS(void) {
 	switch(EVENT) {
 
 	case SCAN:
-		if(ADC1->DR >= 50 ) {
-
-			ADC_Start_DMA(ADC1, DMA1_Channel1, (uint32_t*)ENZ.PULSE, 400);
-			//ADC1_Stop();
-			//ADC_Cmplt = true;
-
-			EVENT++;
+		if(ADC1->DR >= 50  && !ENZ.PulseActive) {
+			if(!ENZ.PULSE_CNT) {
+				ADC_Start_DMA(ADC1, DMA1_Channel1, (uint32_t*)ENZ.PULSE, 400);
+				TIMx_Start(TIM14);
+				ENZ_PULSE_Counting();
+				ENZ.PulseActive = true;
+				EVENT= FIRST_PULSE;
+			}
+			else{
+				ENZ_PULSE_Counting();
+				EVENT= SECOND_PULSE;
+			}
 		}
+		break;
 
 	case FIRST_PULSE:
 		if(ADC_Cmplt) {
-
-			ADCSampleCnt = 0;
-			ENZ.ADC_Peak = 0;
-			Pulse_Duration = 0;
-
 			if((ENZ.PULSE[399] > 124))  {
 				/*
 				 * If the buffer is full: Pulse is > 312.5 µs:FAIL the ENZ
@@ -154,14 +153,21 @@ void ENZ_PULSE_EVENTS(void) {
 
 				ADCSampleCnt++;
 			}
-			Pulse_Duration = ADCSampleCnt*T_Sample;
+			ENZ.PULSE_Width = ADCSampleCnt*ENZ_PULSE_SAMPLE_TIME_s ;
 
 			//DEBUG_ENZ();
 			ADC_Cmplt = false;
-			ADC1_Start();
+			EVENT = SCAN;
 		}
-
+		break;
 	case SECOND_PULSE:
-
+		if(ENZ.PULSE_CNT==2) {
+			for (int var = 0; var < ADCSampleCnt; ++var) {
+				ENZ.Energy_J +=(ENZ.PULSE[var] * (ENZ.PULSE[var]) * ENZ_PULSE_SAMPLE_TIME_s);
+			}
+			ENZ.PULSE_Width = ADCSampleCnt*ENZ_PULSE_SAMPLE_TIME_s;
+		}
 	}
 }
+
+

@@ -24,7 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include "adc.h"
 #include "app.h"
-
+#include "tim.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -147,17 +147,49 @@ void SysTick_Handler(void)
 void DMA1_Channel1_IRQHandler(void)
 {
 	if (DMA1->ISR & DMA_ISR_TCIF1) {      //Transfer Complete flag
-		DMA1->IFCR = DMA_IFCR_CTCIF1;     //Clear the flag // DMA1->IFCR = DMA_IFCR_CGIF1; aLL FLAgs
+
 		ADC_Cmplt = true;
+
+		if(ENZ.PULSE[399] < 50 && ENZ.PULSE[398] < 50 && ENZ.PULSE[397] < 50) {
+
+			ENZ.PulseActive = false;
+			ADC1_Start();
+		}
+		else {
+			//Get more samples
+			ENZ.Buff_Full = true;
+		}
+		DMA1->IFCR = DMA_IFCR_CTCIF1;     //Clear the flag // DMA1->IFCR = DMA_IFCR_CGIF1; aLL FLAgs
+
 	}
 }
 
 void ADC1_IRQHandler(void) {
 	if (READ_BIT(ADC1->ISR, ADC_ISR_AWD1)) {
 
+		ENZ_PULSE_CNT();
+
+		if(ENZ.PulseActive && ENZ.Buff_Full )
+		{
+
+			//Do energy  for the last valid data points
+		}
+
+		if(ENZ.PULSE_CNT  == 2) {
+
+			ENZ_ReadPulse_T();
+		}
 		SET_BIT(ADC1->ISR, ADC_ISR_AWD1);
-		ENZ.PULSE_CNT++;
-		// Handle out-of-range condition here
+	}
+}
+
+
+void TIM14_IRQHandler(void) {
+	if (READ_BIT(TIM14->SR, TIM_SR_UIF)) {
+		One_Sec_Elapsed = true;
+		Sec++;
+		CLEAR_BIT(TIM14->SR,  TIM_SR_UIF);
+
 	}
 }
 
