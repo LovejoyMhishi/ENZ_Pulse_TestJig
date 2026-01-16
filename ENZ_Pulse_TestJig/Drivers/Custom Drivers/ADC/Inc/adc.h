@@ -45,13 +45,14 @@
 
 #define t_ADCVREG_SETUP                      2		// 2ms
 #define V_REF_plus                           3.3f   // Internal Voltage Reference
+#define ADC_MAX                              4095
 
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
 /*                                          DATA PROCESSING                                                 */
 /*																						 				    */
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
-extern uint16_t ENZ_Out_V[200];
+
 
 extern bool ADC_Cmplt;
 

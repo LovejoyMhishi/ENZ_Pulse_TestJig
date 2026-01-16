@@ -100,8 +100,6 @@ int main(void)
 
 	ADC1_Start();
 	GPIO_Writepin(GPIOA, LED_3, GPIO_PIN_SET);
-	//    ADC_Start_DMA(ADC1, DMA1_Channel1, (uint32_t*)ENZ_Out_V, 200);
-
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -114,7 +112,6 @@ int main(void)
 		ENZ_PULSE_EVENTS();
 
 		//uint16_t ADC_DATA = ADC1->DR;
-
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */

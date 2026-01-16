@@ -75,12 +75,11 @@ void ENZ_FAILED(void){
 
 }
 
-//void DEBUG_ENZ(void) {
-//	if(ADC_Cmplt) {
-//		for (uint8_t var = 0; var < 200; ++var) {
-//			ENZ_Out_V[var] = (V_REF_plus*ENZ.PULSE[var] / 4095 ) *3015;
-//			printf("%d \n", ENZ_Out_V[var]);
-//		}
-//		//ADC_Cmplt =false;
-//	}
-//}
+void DEBUG_ENZ(void) {
+	if(ADC_Cmplt) {
+		for (uint8_t var = 0; var < 200; ++var) {
+			printf("%d \n", 100);
+		}
+		//ADC_Cmplt =false;
+	}
+}

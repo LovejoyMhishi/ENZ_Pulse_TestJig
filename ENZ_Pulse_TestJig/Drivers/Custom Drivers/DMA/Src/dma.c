@@ -44,6 +44,7 @@
  * ────────────────────────────────────────────────────────────── */
 void DMA1_Init(void) {
 	CLEAR_REG(DMA1_Channel1->CCR);
+	CLEAR_REG(DMAMUX1_Channel0->CCR);
 
 	SET_BIT(RCC->AHBENR,RCC_AHBENR_DMA1EN);                       //DMA1 and DMAMUX clock enable
 
@@ -69,6 +70,8 @@ void DMA1_Init(void) {
 	SET_BIT(DMA1_Channel1->CCR, DMA_CCR_PSIZE_0);                 //01: Peripheral size 16Bits
 	SET_BIT(DMA1_Channel1->CCR, DMA_CCR_MSIZE_0);                 //01: Memory size 16Bits
 	SET_BIT(DMA1_Channel1->CCR, DMA_CCR_TCIE);                    //1: Transfer complete interrupt EN
+
+
 }
 
 /* ────────────────────────────────────────────────────────────── /
@@ -108,11 +111,10 @@ void ADC_Start_DMA(ADC_TypeDef *ADCx, DMA_Channel_TypeDef *DMA_Channelx, uint32_
 
 void ADC_Stop_DMA(ADC_TypeDef *ADCx) {
 
+	CLEAR_BIT(ADCx->CFGR1, ADC_CFGR1_DMAEN);                       //0: Direct memory access Disable
 	SET_BIT(ADCx->CR, ADC_CR_ADSTP);
 	while (ADCx->CR & ADC_CR_ADSTART);
-	CLEAR_BIT(ADCx->CFGR1, ADC_CFGR1_DMAEN);                       //0: Direct memory access Disable
-	CLEAR_BIT(DMA1_Channel1->CCR, DMA_CCR_EN);                     //0: Channel Disabled
-
+	CLEAR_BIT(DMA1_Channel1->CCR, DMA_CCR_EN);                     //0: Channel Disable
 
 }
 

@@ -38,6 +38,9 @@
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 #define ENZ_PULSE_SAMPLE_TIME_s              0.78125e-6f      //Total Time per sample:(12.5 + 12.5)(1/f_adc )
 #define ENZ_LOAD_RES                         501              //501 Ohm
+#define VOLTAGE_DIVIDER_GAIN                 3015
+#define ENZ_ENERGY_K                        (ENZ_PULSE_SAMPLE_TIME_s / ENZ_LOAD_RES)
+#define ADC_TO_VOLTAGE_SCALE                ((V_REF_plus*VOLTAGE_DIVIDER_GAIN) / ADC_MAX )
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
 /*                                          DATA PROCESSING                                                 */
@@ -48,7 +51,7 @@ typedef struct{
 	uint16_t PULSE[400];
 	uint16_t V_Peak;
 	uint16_t I_Peak;
-	uint16_t Energy_J;
+	double Energy_J;
 	uint16_t ADC_Peak;
 	uint8_t  Buff_Num;
 	uint8_t PULSE_CNT;
@@ -62,14 +65,17 @@ typedef struct{
 typedef enum {
 	SCAN = 0,
     FIRST_PULSE ,
-    SECOND_PULSE
+    SECOND_PULSE,
+	DATA_PROCESSING
 } ENZ_TST_JIG ;
 
 
 
 extern volatile Energizer ENZ;                       // Declare ENZ
+extern volatile uint16_t ENZ_THIRD_PULSE[400];
 
-
+extern bool THIRD;
+extern volatile uint16_t third;
 extern bool One_Sec_Elapsed;
 extern uint8_t Sec;
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */

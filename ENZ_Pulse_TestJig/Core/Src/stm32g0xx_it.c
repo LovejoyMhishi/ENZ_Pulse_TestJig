@@ -155,11 +155,14 @@ void DMA1_Channel1_IRQHandler(void)
 			ENZ.PulseActive = false;
 			ADC1_Start();
 		}
-		else {
-			//Get more samples
-			ENZ.Buff_Full = true;
+		if (THIRD) {
+			third++;
 		}
-		DMA1->IFCR = DMA_IFCR_CTCIF1;     //Clear the flag // DMA1->IFCR = DMA_IFCR_CGIF1; aLL FLAgs
+		//		else {
+		//			//Get more samples
+		//			ENZ.Buff_Full = true;
+
+		SET_BIT(DMA1->IFCR, DMA_IFCR_CGIF1);
 
 	}
 }
