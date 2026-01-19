@@ -146,40 +146,23 @@ void SysTick_Handler(void)
 /* USER CODE BEGIN 1 */
 void DMA1_Channel1_IRQHandler(void)
 {
-	if (DMA1->ISR & DMA_ISR_TCIF1) {      //Transfer Complete flag
-
+	if (DMA1->ISR & DMA_ISR_TCIF1)
+	{
+		ENZ.PulseActive = false;
 		ADC_Cmplt = true;
-
-		if(ENZ.PULSE[399] < 50 && ENZ.PULSE[398] < 50 && ENZ.PULSE[397] < 50) {
-
-			ENZ.PulseActive = false;
-			ADC1_Start();
-		}
-		if (THIRD) {
-			third++;
-		}
-		//		else {
-		//			//Get more samples
-		//			ENZ.Buff_Full = true;
-
 		SET_BIT(DMA1->IFCR, DMA_IFCR_CGIF1);
-
+		ADC1_Start();
 	}
 }
 
-void ADC1_IRQHandler(void) {
-	if (READ_BIT(ADC1->ISR, ADC_ISR_AWD1)) {
-
+void ADC1_IRQHandler(void)
+{
+	if (READ_BIT(ADC1->ISR, ADC_ISR_AWD1))
+	{
 		ENZ_PULSE_CNT();
 
-		if(ENZ.PulseActive && ENZ.Buff_Full )
+		if(ENZ.PULSE_CNT  == 2)
 		{
-
-			//Do energy  for the last valid data points
-		}
-
-		if(ENZ.PULSE_CNT  == 2) {
-
 			ENZ_ReadPulse_T();
 		}
 		SET_BIT(ADC1->ISR, ADC_ISR_AWD1);
@@ -187,12 +170,19 @@ void ADC1_IRQHandler(void) {
 }
 
 
-void TIM14_IRQHandler(void) {
-	if (READ_BIT(TIM14->SR, TIM_SR_UIF)) {
-		One_Sec_Elapsed = true;
-		Sec++;
+void TIM14_IRQHandler(void)
+{
+	if (READ_BIT(TIM14->SR, TIM_SR_UIF))
+	{
+		ENZ.V_Peak = 0;
+		ENZ.I_Peak = 0;
+		ENZ.Energy_J = 0;
+		ENZ.ADC_Peak = 0;
+		ENZ.PULSE_CNT = 0;
+		ENZ.PULSE_Width = 0;
+		ENZ.PULSE_T = 0;
+		EVENT = SCAN;
 		CLEAR_BIT(TIM14->SR,  TIM_SR_UIF);
-
 	}
 }
 

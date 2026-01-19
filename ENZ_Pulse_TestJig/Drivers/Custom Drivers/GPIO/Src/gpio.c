@@ -140,14 +140,14 @@ void GPIO_Init(void) {
 
 }
 
-void GPIO_Writepin(GPIO_TypeDef *GPIOx, uint16_t Pin, GPIO_PinState State) {
-
-	if(State == GPIO_PIN_SET) {
+void GPIO_Writepin(GPIO_TypeDef *GPIOx, uint16_t Pin, GPIO_PinState State)
+{
+	if(State == GPIO_PIN_SET)
+	{
 		WRITE_REG(GPIOx->BSRR, Pin);                                //Drive Pin HIGH
 	}
-
-	else{
+	else
+	{
 		WRITE_REG(GPIOx->BSRR, (uint32_t)Pin << 16);                //Drive Pin LOW
 	}
-
 }

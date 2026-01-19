@@ -45,7 +45,8 @@
 /*																										    */
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 
-void ENZ_PASSED(void){
+void ENZ_PASSED(void)
+{
 	GPIO_Writepin(GPIOA, LED_3, GPIO_PIN_SET);
 	GPIO_Writepin(GPIOA, LED_2, GPIO_PIN_RESET);
 	SET_BIT(TIM3->CR1, TIM_CR1_CEN);
@@ -57,8 +58,8 @@ void ENZ_PASSED(void){
 }
 
 
-void ENZ_FAILED(void){
-
+void ENZ_FAILED(void)
+{
 	GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_RESET);
 	SET_BIT(TIM3->CR1, TIM_CR1_CEN);
 	TimeOut(200);
@@ -72,14 +73,15 @@ void ENZ_FAILED(void){
 	TimeOut(1000);
 	CLEAR_BIT(TIM3->CR1, TIM_CR1_CEN);
 	GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_SET);
-
 }
 
-void DEBUG_ENZ(void) {
-	if(ADC_Cmplt) {
-		for (uint8_t var = 0; var < 200; ++var) {
+void DEBUG_ENZ(void)
+{
+	if(ADC_Cmplt)
+	{
+		for (uint8_t var = 0; var < 200; ++var)
+		{
 			printf("%d \n", 100);
 		}
-		//ADC_Cmplt =false;
 	}
 }

@@ -129,7 +129,7 @@ void ADC1_Init(void) {
 	/*
 	 * 14.3.10+11: Conversion modes (CONT = 0 & CONT = 1)
 	 */
-	SET_BIT(ADC1->CFGR1, ADC_CFGR1_CONT);                          //1: Continuous conversion mode*********
+	SET_BIT(ADC1->CFGR1, ADC_CFGR1_CONT);                          //1: Continuous conversion mode************
 
 
 	/*
@@ -157,22 +157,20 @@ void ADC1_Init(void) {
  * Details  : Sets ADSTART to begin single/ continuous conversions
  * Runtime  : ~X.Xxx
  * ────────────────────────────────────────────────────────────── */
-void ADC1_Start(void) {
-	/*
-	 *  14.3.12: Starting conversions (ADSTART)
-	 */
-	SET_BIT(ADC1->CFGR1, ADC_CFGR1_CONT);                          //1: Continuous conversion mode*********
-	SET_BIT(ADC1->CR, ADC_CR_ADSTART);
-}
-void ADC1_Stop(void) {
-
-	CLEAR_BIT(ADC1->CFGR1, ADC_CFGR1_CONT);                          //1: Continuous conversion mode*********
-
-	SET_BIT(ADC1->CR, ADC_CR_ADSTP);
-	while(ADC1->CR & ADC_CR_ADSTART) {
-
+void ADC1_Start(void)
+{
+	if(!READ_BIT(ADC1->CFGR1,ADC_CFGR1_CONT))
+	{
+		SET_BIT(ADC1->CFGR1, ADC_CFGR1_CONT);                        //1: Continuous conversion mode***********
 	}
 
+	SET_BIT(ADC1->CR, ADC_CR_ADSTART);                               //14.3.12: Starting conversions (ADSTART)
+}
+void ADC1_Stop(void)
+{
+	CLEAR_BIT(ADC1->CFGR1, ADC_CFGR1_CONT);                          //1: Continuous conversion mode
+	SET_BIT(ADC1->CR, ADC_CR_ADSTP);
+	while(ADC1->CR & ADC_CR_ADSTART);
 }
 /* ────────────────────────────────────────────────────────────── /
  * Function : ADC1_Read()
@@ -180,30 +178,33 @@ void ADC1_Stop(void) {
  * Details  : Returns ADC result after conversion
  * Runtime  : ~X.Xxx
  * ────────────────────────────────────────────────────────────── */
-uint16_t ADC1_Read(void){
-
+uint16_t ADC1_Read(void)
+{
 	while (!(ADC1->ISR & ADC_ISR_EOC));                           //Wait for end of conversion (EOC)
-
 	return ADC1->DR;                                              //Read the value
 }
-
-void ADC_AWD_Thrds_Config(void) {
+/* ────────────────────────────────────────────────────────────── /
+ * Function : ADC_AWD_Thrds_Config()
+ * Purpose  : Configure ADC AWD thresholds
+ * Details  : MCU Interrupt if ADC-DR > ADC1->AWD1TR
+ * Runtime  : ~X.Xxx
+ * ────────────────────────────────────────────────────────────── */
+void ADC_AWD_Thrds_Config(void)
+{
 	SET_BIT(ADC1->CFGR1, ADC_CFGR1_AWD1EN);                       //1: Analog watchdog 1 EN
 	SET_BIT(ADC1->CFGR1, ADC_CFGR1_AWD1SGL);                      //1: Analog watchdog 1 EN on a single channel
 	CLEAR_BIT(ADC1->CFGR1, ADC_CFGR1_AWD1CH);                     //00000: ADC analog input Channel 0 monitored by AWD
 
-
 	WRITE_REG(ADC1->AWD1TR, ADC_AWD1TR_HT1_10);                   //1024 HTx THR
 	SET_BIT(ADC1->IER, ADC_IER_AWD1IE);                           //Analog watchdog 1 interrupt enable
-
 	/*
 	 * Enable NVIC IRQ
 	 */
 	NVIC_SetPriority(ADC1_IRQn, 3);
-
 }
 
-void  ADC_AWD_Thrds_Clear(void) {
+void ADC_AWD_Thrds_Clear(void)
+{
 	ADC1_Stop();
 	CLEAR_BIT(ADC1->CFGR1, ADC_CFGR1_AWD1EN);                       //0: Analog watchdog 1 Disable
 	CLEAR_BIT(ADC1->CFGR1, ADC_CFGR1_AWD1SGL);                      //0: Analog watchdog 1 EN on a single channel

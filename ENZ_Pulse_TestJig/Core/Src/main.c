@@ -106,12 +106,9 @@ int main(void)
 	/* USER CODE BEGIN WHILE */
 	while (1)
 	{
-		//		ENZ_PULSE_Detector();
-		//		ENZ_PULSE_DataProc();
 
 		ENZ_PULSE_EVENTS();
 
-		//uint16_t ADC_DATA = ADC1->DR;
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
