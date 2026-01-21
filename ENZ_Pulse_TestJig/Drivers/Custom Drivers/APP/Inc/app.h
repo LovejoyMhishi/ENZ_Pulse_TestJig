@@ -65,17 +65,15 @@ typedef struct{
 	bool PulseActive;
 }Energizer;
 
-
 typedef enum {
 	SCAN = 0,
 	FIRST_PULSE ,
 	SECOND_PULSE,
 	DATA_PROCESSING
-} ENZ_TST_JIG ;
+}ENZ_TST_JIG;
 
 
-
-extern volatile Energizer ENZ;                                       // Declare ENZ
+extern volatile Energizer ENZ;
 extern ENZ_TST_JIG EVENT;
 
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
@@ -85,7 +83,6 @@ extern ENZ_TST_JIG EVENT;
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 
 void ENZ_PULSE_EVENTS(void);
-
 
 __STATIC_INLINE void ENZ_PULSE_Counting(void)
 {

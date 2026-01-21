@@ -46,7 +46,8 @@
 #define TIM14_PSC                           63999
 #define TIM14_ARR                           4999
 
-
+#define TIM16_PSC                           63999
+#define TIM16_ARR                           49
 
 
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
@@ -56,7 +57,7 @@
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 void TIM3_Init(void);
 void TIM4_Init(void);
-
+void TIM16_Init(void);
 
 
 __STATIC_INLINE void TIMx_Start(TIM_TypeDef *TIMx)

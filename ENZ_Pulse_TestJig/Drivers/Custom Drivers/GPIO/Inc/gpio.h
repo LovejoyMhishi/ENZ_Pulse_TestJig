@@ -50,7 +50,7 @@
 #define BUZZER                              GPIO_PIN_6   //GPIO PA6
 #define LED_3                               GPIO_PIN_7   //GPIO PA7
 #define LED_2                               GPIO_PIN_8   //GPIO PA8
-#define LED_1                               GPIO_PIN_9   //GPIO PA9
+#define LED_1                               GPIO_PIN_11   //GPIO PA9
 #define LED_0                               GPIO_PIN_12  //GPIO PA10
 #define Prog_DRUIDx_TX                      GPIO_PIN_6   //GPIO PB6
 #define Prog_DRUIDx_RX                      GPIO_PIN_7   //GPIO PB7

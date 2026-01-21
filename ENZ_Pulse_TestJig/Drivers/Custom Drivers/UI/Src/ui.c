@@ -39,28 +39,71 @@
 #include "app.h"
 
 
+volatile ButtonState Button = {
+		.StateHistory = 0b0000000000000000,
+		.StateCount = 0
+};
+
+volatile ST_BUTTON BUTTON_STATE = IDLE;
+
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
 /*                                           HIGH-LEVEL FUNCTIONS                                           */
 /*																										    */
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
+void ScanButtonPress(void)
+{
+	if(!READ_BIT(GPIOA->IDR, GPIO_IDR_ID5) && BUTTON_STATE == IDLE)
+	{
+		TIMx_Start(TIM16);
+		BUTTON_STATE = PRESS_DETECTED;
+	}
+}
+
+void CheckButtonState(void)
+{
+
+	if(BUTTON_STATE == PRESS_DETECTED)
+	{
+
+		if(Button.StateCount >= 16)
+		{
+			Button.StateHistory = ~Button.StateHistory;
+			TIMx_Stop(TIM16);
+			if(Button.StateHistory >= BUTTON_LONG_PRESS)
+			{
+				BUTTON_STATE = LONG_PRESS;
+
+			}
+			else if((Button.StateHistory & BUTTON_SHORT_PRESS) >= 0x1F)
+			{
+				BUTTON_STATE = SHORT_PRESS;
+			}
+			else
+			{
+				BUTTON_STATE = IDLE;
+			}
+
+			Button.StateHistory = 0;
+			Button.StateCount = 0;
+		}
+	}
+}
 
 void ENZ_PASSED(void)
 {
-	GPIO_Writepin(GPIOA, LED_3, GPIO_PIN_SET);
-	GPIO_Writepin(GPIOA, LED_2, GPIO_PIN_RESET);
+	GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_RESET);
 	SET_BIT(TIM3->CR1, TIM_CR1_CEN);
 	TimeOut(100);
 	CLEAR_BIT(TIM3->CR1, TIM_CR1_CEN);
 	TimeOut(800);
-	GPIO_Writepin(GPIOA, LED_3, GPIO_PIN_RESET);
-	GPIO_Writepin(GPIOA, LED_2, GPIO_PIN_SET);
+	GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_SET);
 }
 
 
 void ENZ_FAILED(void)
 {
-	GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_RESET);
+	GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_RESET);
 	SET_BIT(TIM3->CR1, TIM_CR1_CEN);
 	TimeOut(200);
 	CLEAR_BIT(TIM3->CR1, TIM_CR1_CEN);
@@ -72,7 +115,7 @@ void ENZ_FAILED(void)
 	SET_BIT(TIM3->CR1, TIM_CR1_CEN);
 	TimeOut(1000);
 	CLEAR_BIT(TIM3->CR1, TIM_CR1_CEN);
-	GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_SET);
+	GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_SET);
 }
 
 void DEBUG_ENZ(void)

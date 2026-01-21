@@ -34,9 +34,8 @@
 #include "gpio.h"
 
 
-void GPIO_Init(void) {
-
-
+void GPIO_Init(void)
+{
 	/*
 	 * GPIO CLK EN
 	 */
@@ -51,6 +50,11 @@ void GPIO_Init(void) {
 	 * GPIO PA1: +5V_EN
 	 */
 
+	CLEAR_BIT(GPIOA->MODER, GPIO_MODER_MODE1);                     //Clear MODE7[1:0]
+	SET_BIT(GPIOA->MODER, GPIO_MODER_MODE1_0);                     //01: General purpose output mode
+	CLEAR_BIT(GPIOA->OTYPER, GPIO_OTYPER_OT1);                     //0: Output push-pull
+	CLEAR_BIT(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED1);               //00: Very low speed
+	CLEAR_BIT(GPIOA->PUPDR, GPIO_PUPDR_PUPD1);                     //00: No pull-up, pull-down
 	/*
 	 * GPIO PA2: UART_Pi_RX_ST_TX
 	 */
@@ -60,8 +64,6 @@ void GPIO_Init(void) {
 	SET_BIT(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED2_1);               //10: High speed
 	CLEAR_BIT(GPIOA->PUPDR, GPIO_PUPDR_PUPD2);                     //00: No pull-up, pull-down
 	SET_BIT(GPIOA->AFR[0], GPIO_AFRL_AFSEL2_0);                    //PA2-->AFSEL2 & 0001: AF1--> USART2_TX Alternate Function
-
-
 	/*
 	 * GPIO PA3: UART_Pi_TX_ST_RX
 	 */
@@ -80,7 +82,8 @@ void GPIO_Init(void) {
 	/*
 	 * GPIO PA5: BUTTON_0
 	 */
-
+	CLEAR_BIT(GPIOA->MODER, GPIO_MODER_MODE5);                     //00: Input mode
+	CLEAR_BIT(GPIOA->PUPDR, GPIO_PUPDR_PUPD5);                     //00: No pull-up, pull-down
 	/*
 	 * GPIO PA6: BUZZER
 	 */
@@ -111,14 +114,14 @@ void GPIO_Init(void) {
 	GPIO_Writepin(GPIOA, LED_2, GPIO_PIN_SET);                     //Pin should be HIGH by Default
 
 	/*
-	 * GPIO PA9: LED_1
+	 * GPIO PA11: LED_1
 	 */
-	CLEAR_BIT(GPIOA->MODER, GPIO_MODER_MODE9);                     //Clear MODE7[1:0]
-	SET_BIT(GPIOA->MODER, GPIO_MODER_MODE9_0);                     //01: General purpose output mode
-	CLEAR_BIT(GPIOA->OTYPER, GPIO_OTYPER_OT9);                     //0: Output push-pull
-	CLEAR_BIT(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED9);               //00: Very low speed
-	CLEAR_BIT(GPIOA->PUPDR, GPIO_PUPDR_PUPD9);                     //00: No pull-up, pull-down
-	GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_SET);                     //Pin should be HIGH by Default
+	CLEAR_BIT(GPIOA->MODER, GPIO_MODER_MODE11);                     //Clear MODE7[1:0]
+	SET_BIT(GPIOA->MODER, GPIO_MODER_MODE11_0);                     //01: General purpose output mode
+	CLEAR_BIT(GPIOA->OTYPER, GPIO_OTYPER_OT11);                     //0: Output push-pull
+	CLEAR_BIT(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED11);               //00: Very low speed
+	CLEAR_BIT(GPIOA->PUPDR, GPIO_PUPDR_PUPD11);                     //00: No pull-up, pull-down
+	GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_SET);                      //Pin should be HIGH by Default
 
 	/*
 	 * GPIO PA12[PA10]: LED_0

@@ -84,6 +84,7 @@ int main(void)
 	DMA1_Init();
 	TIM3_Init();
 	TIM14_Init();
+	TIM16_Init();
 	USART_Init();
 	/* USER CODE END Init */
 
@@ -100,6 +101,8 @@ int main(void)
 
 	ADC1_Start();
 	GPIO_Writepin(GPIOA, LED_3, GPIO_PIN_SET);
+
+	//GPIO_Writepin(GPIOA, Plus_5V_EN , GPIO_PIN_SET);
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -108,7 +111,18 @@ int main(void)
 	{
 
 		ENZ_PULSE_EVENTS();
+		ScanButtonPress();
+		CheckButtonState();
 
+		if (BUTTON_STATE == SHORT_PRESS) {
+			ENZ_PASSED();
+			BUTTON_STATE = IDLE;
+		}
+		else if(BUTTON_STATE == LONG_PRESS)
+		{
+			ENZ_FAILED();
+			BUTTON_STATE = IDLE;
+		}
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */

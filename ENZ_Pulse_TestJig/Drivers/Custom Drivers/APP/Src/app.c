@@ -54,7 +54,9 @@ volatile Energizer ENZ = {
 };
 
 ENZ_TST_JIG EVENT = SCAN;
+
 static uint16_t ADCSampleCnt;
+
 
 
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
@@ -163,5 +165,4 @@ void ENZ_PULSE_EVENTS(void) {
 		break;
 	}
 }
-
 

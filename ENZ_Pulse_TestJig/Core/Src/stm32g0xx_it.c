@@ -25,6 +25,7 @@
 #include "adc.h"
 #include "app.h"
 #include "tim.h"
+#include "ui.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -144,6 +145,12 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /* USER CODE BEGIN 1 */
+/* ────────────────────────────────────────────────────────────── /
+ * Handler  : DMA1_Channel1_IRQHandler()
+ * Purpose  : Gets triggered after ENZ.PULSE[500] gets full
+ * Details  : Sets ADC flags used in the main FSM
+ * Runtime  : ~X.Xxx
+ * ────────────────────────────────────────────────────────────── */
 void DMA1_Channel1_IRQHandler(void)
 {
 	if (DMA1->ISR & DMA_ISR_TCIF1)
@@ -154,7 +161,12 @@ void DMA1_Channel1_IRQHandler(void)
 		ADC1_Start();
 	}
 }
-
+/* ────────────────────────────────────────────────────────────── /
+ * Handler  : ADC1_IRQHandler()
+ * Purpose  : Gets triggered after a pulse has been detected
+ * Details  : ADC Flags and returns the ENZ.PULSE_T
+ * Runtime  : ~X.Xxx
+ * ────────────────────────────────────────────────────────────── */
 void ADC1_IRQHandler(void)
 {
 	if (READ_BIT(ADC1->ISR, ADC_ISR_AWD1))
@@ -169,7 +181,12 @@ void ADC1_IRQHandler(void)
 	}
 }
 
-
+/* ────────────────────────────────────────────────────────────── /
+ * Handler  : TIM14_IRQHandler()
+ * Purpose  : Gets triggered after 5s has elapsed
+ * Details  : Used to Count the Time between pulses: TIM14->CNT
+ * Runtime  : ~X.Xxx
+ * ────────────────────────────────────────────────────────────── */
 void TIM14_IRQHandler(void)
 {
 	if (READ_BIT(TIM14->SR, TIM_SR_UIF))
@@ -184,6 +201,18 @@ void TIM14_IRQHandler(void)
 		EVENT = SCAN;
 		CLEAR_BIT(TIM14->SR,  TIM_SR_UIF);
 	}
+}
+
+
+void TIM16_IRQHandler(void)
+{
+	if(READ_BIT(TIM16->SR, TIM_SR_UIF))
+	{
+		Button.StateHistory = (Button.StateHistory << 1) | (READ_BIT(GPIOA->IDR, GPIO_IDR_ID5));
+		Button.StateCount++;
+		CLEAR_BIT(TIM16->SR,  TIM_SR_UIF);
+	}
+
 }
 
 //void SysTick_Handler(void){

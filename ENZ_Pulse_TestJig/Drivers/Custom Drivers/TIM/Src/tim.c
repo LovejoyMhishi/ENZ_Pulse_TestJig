@@ -75,4 +75,24 @@ void TIM14_Init(void)
 }
 
 
+void TIM16_Init(void)
+{
+	CLEAR_BIT(TIM16->CR1, TIM_CR1_CEN);                               //Ensure that the Timer's Counter is OFF
+	SET_BIT(RCC->APBENR2, RCC_APBENR2_TIM16EN);                       //TIM14 timer clock enable
+
+	WRITE_REG(TIM16->PSC, TIM16_PSC);
+	WRITE_REG(TIM16->ARR, TIM16_ARR);
+	SET_BIT(TIM16->EGR, TIM_EGR_UG);                                  //Force update event
+	CLEAR_BIT(TIM16->SR,  TIM_SR_UIF);
+	SET_BIT(TIM16->CR1, TIM_CR1_ARPE);                                //ARPE EN
+	SET_BIT(TIM16->DIER, TIM_DIER_UIE);                               //Update interrupt EN
+	/*
+	 * Enable NVIC IRQ
+	 */
+	NVIC_SetPriority(TIM16_IRQn, 2);
+	NVIC_EnableIRQ(TIM16_IRQn);
+}
+
+
+
 
