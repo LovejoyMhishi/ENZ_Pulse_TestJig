@@ -111,18 +111,7 @@ int main(void)
 	{
 
 		ENZ_PULSE_EVENTS();
-		ScanButtonPress();
-		CheckButtonState();
-
-		if (BUTTON_STATE == SHORT_PRESS) {
-			ENZ_PASSED();
-			BUTTON_STATE = IDLE;
-		}
-		else if(BUTTON_STATE == LONG_PRESS)
-		{
-			ENZ_FAILED();
-			BUTTON_STATE = IDLE;
-		}
+		BUTTON_STATES();
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */

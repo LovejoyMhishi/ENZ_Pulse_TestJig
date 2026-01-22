@@ -51,21 +51,19 @@ volatile ST_BUTTON BUTTON_STATE = IDLE;
 /*                                           HIGH-LEVEL FUNCTIONS                                           */
 /*																										    */
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
-void ScanButtonPress(void)
+
+void BUTTON_STATES(void)
 {
-	if(!READ_BIT(GPIOA->IDR, GPIO_IDR_ID5) && BUTTON_STATE == IDLE)
+	switch(BUTTON_STATE)
 	{
-		TIMx_Start(TIM16);
-		BUTTON_STATE = PRESS_DETECTED;
-	}
-}
-
-void CheckButtonState(void)
-{
-
-	if(BUTTON_STATE == PRESS_DETECTED)
-	{
-
+	case IDLE:
+		if(!READ_BIT(GPIOA->IDR, GPIO_IDR_ID5))
+		{
+			TIMx_Start(TIM16);
+			BUTTON_STATE = PRESS_DETECTED;
+		}
+		break;
+	case PRESS_DETECTED:
 		if(Button.StateCount >= 16)
 		{
 			Button.StateHistory = ~Button.StateHistory;
@@ -73,7 +71,6 @@ void CheckButtonState(void)
 			if(Button.StateHistory >= BUTTON_LONG_PRESS)
 			{
 				BUTTON_STATE = LONG_PRESS;
-
 			}
 			else if((Button.StateHistory & BUTTON_SHORT_PRESS) >= 0x1F)
 			{
@@ -87,9 +84,18 @@ void CheckButtonState(void)
 			Button.StateHistory = 0;
 			Button.StateCount = 0;
 		}
+		break;
+	case SHORT_PRESS:
+		ENZ_PASSED();
+		BUTTON_STATE = IDLE;
+		break;
+
+	case LONG_PRESS:
+		ENZ_FAILED();
+		BUTTON_STATE = IDLE;
+		break;
 	}
 }
-
 void ENZ_PASSED(void)
 {
 	GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_RESET);

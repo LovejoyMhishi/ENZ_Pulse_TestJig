@@ -34,7 +34,7 @@
 /*																										    */
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 #define BUTTON_SHORT_PRESS                    0x001F         //0b0000000011111111
-#define BUTTON_LONG_PRESS                     0x3FFF         //0b1111111111111111
+#define BUTTON_LONG_PRESS                     0xFFFF         //0b1111111111111111
 
 typedef struct{
 	uint16_t StateHistory;
@@ -55,8 +55,8 @@ extern volatile ButtonState Button;
 /*                                           HIGH-LEVEL FUNCTIONS                                           */
 /*																										    */
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
-void ScanButtonPress(void);
-void CheckButtonState(void);
+
+void BUTTON_STATES(void);
 void ENZ_PASSED(void);
 void ENZ_FAILED(void);
 void DEBUG_ENZ(void);

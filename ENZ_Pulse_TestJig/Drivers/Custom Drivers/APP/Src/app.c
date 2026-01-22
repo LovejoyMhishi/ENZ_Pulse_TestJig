@@ -71,7 +71,8 @@ static uint16_t ADCSampleCnt;
  * Runtime  : ~X.Xxx
  * ────────────────────────────────────────────────────────────── */
 
-void ENZ_PULSE_EVENTS(void) {
+void ENZ_PULSE_EVENTS(void)
+{
 	switch(EVENT)
 	{
 	case SCAN:
