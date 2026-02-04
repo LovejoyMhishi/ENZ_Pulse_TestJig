@@ -44,17 +44,16 @@
  * ────────────────────────────────────────────────────────────── */
 void DMA1_Init(void)
 {
+	/*
+	 * DMA1_CHannel1-->ADC
+	 */
 	CLEAR_REG(DMA1_Channel1->CCR);
 	CLEAR_REG(DMAMUX1_Channel0->CCR);
-
 	SET_BIT(RCC->AHBENR,RCC_AHBENR_DMA1EN);                       //DMA1 and DMAMUX clock enable
+	SET_BIT(DMAMUX1_Channel0->CCR, DMAMUX_ADC_DMA );              //Set ADC as DMA trigger*************************
 
-	SET_BIT(DMAMUX1_Channel0->CCR, DMAMUX_ADC_DMA );              //Set ADC as DMA trigger**********************
-	/*
-	 * Enable NVIC IRQ
-	 */
-	HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 1, 0);
-	HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+	NVIC_SetPriority(DMA1_Channel1_IRQn, 1);                      // Enable DMA1_CHannel1 NVIC IRQ
+	NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 
 	CLEAR_BIT(DMA1_Channel1->CCR, DMA_CCR_EN);                    // Disable channel first for configuration
 	/*
@@ -68,6 +67,48 @@ void DMA1_Init(void)
 	SET_BIT(DMA1_Channel1->CCR, DMA_CCR_PSIZE_0);                 //01: Peripheral size 16Bits
 	SET_BIT(DMA1_Channel1->CCR, DMA_CCR_MSIZE_0);                 //01: Memory size 16Bits
 	SET_BIT(DMA1_Channel1->CCR, DMA_CCR_TCIE);                    //1: Transfer complete interrupt EN
+
+	/*
+	 * DMA1_CHannel2--> USART2 Rx
+	 */
+	CLEAR_REG(DMA1_Channel2->CCR);
+	CLEAR_REG(DMAMUX1_Channel1->CCR);
+	SET_BIT(DMAMUX1_Channel1->CCR, DMAMUX_USART2_RX_DMA );        //Set USART2 Rx as DMA trigger***********************
+
+	CLEAR_BIT(DMA1_Channel1->CCR, DMA_CCR_EN);                    //Disable channel first for configuration
+	/*
+	 *  Configure DMA_CCRx register parameters
+	 */
+	SET_BIT(DMA1_Channel2->CCR, DMA_CCR_PL_1);                    //10: Channel priority
+	CLEAR_BIT(DMA1_Channel2->CCR, DMA_CCR_DIR);                   //0: Data transfer direction (Peripheral--->Memory)
+	CLEAR_BIT(DMA1_Channel2->CCR, DMA_CCR_CIRC);                  //0: Circular mode disabled***********************
+	CLEAR_BIT(DMA1_Channel2->CCR, DMA_CCR_PINC);                  //0: Peripheral incremented mode disabled
+	SET_BIT(DMA1_Channel2->CCR, DMA_CCR_MINC);                    //1: Memory incremented mode EN
+	CLEAR_BIT(DMA1_Channel2->CCR, DMA_CCR_PSIZE);                 //00: Peripheral size 8Bits
+	CLEAR_BIT(DMA1_Channel2->CCR, DMA_CCR_MSIZE);                 //00: Memory size 8Bits
+	SET_BIT(DMA1_Channel2->CCR, DMA_CCR_TCIE);                    //1: Transfer complete interrupt EN
+	/*
+	 * DMA1_CHannel3--> USART2 Tx
+	 */
+	CLEAR_REG(DMA1_Channel3->CCR);
+	CLEAR_REG(DMAMUX1_Channel2->CCR);
+	SET_BIT(DMAMUX1_Channel2->CCR, DMAMUX_USART2_TX_DMA );        //Set USART2 Tx as DMA trigger***********************
+
+	NVIC_SetPriority(DMA1_Channel2_3_IRQn, 2);                    //Enable DMA1_CHannel2 & DMA1_CHannel3  NVIC IRQ
+	NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);
+
+	CLEAR_BIT(DMA1_Channel1->CCR, DMA_CCR_EN);                    // Disable channel first for configuration
+	/*
+	 * Configure DMA_CCRx register parameters
+	 */
+	SET_BIT(DMA1_Channel3->CCR, DMA_CCR_PL);                      //11: Channel priority very high
+	SET_BIT(DMA1_Channel3->CCR, DMA_CCR_DIR);                     //0: Data transfer direction (Memory--->Peripheral)
+	CLEAR_BIT(DMA1_Channel3->CCR, DMA_CCR_CIRC);                  //0: Circular mode disabled***********************
+	CLEAR_BIT(DMA1_Channel3->CCR, DMA_CCR_PINC);                  //0: Peripheral incremented mode disabled
+	SET_BIT(DMA1_Channel3->CCR, DMA_CCR_MINC);                    //1: Memory incremented mode EN
+	CLEAR_BIT(DMA1_Channel3->CCR, DMA_CCR_PSIZE);                 //00: Peripheral size 8Bits
+	CLEAR_BIT(DMA1_Channel3->CCR, DMA_CCR_MSIZE);                 //00: Memory size 8Bits
+	SET_BIT(DMA1_Channel3->CCR, DMA_CCR_TCIE);                    //1: Transfer complete interrupt EN
 }
 
 /* ────────────────────────────────────────────────────────────── /
@@ -86,7 +127,7 @@ void ADC_Start_DMA(ADC_TypeDef *ADCx, DMA_Channel_TypeDef *DMA_Channelx, uint32_
 
 	//CLEAR_BIT(ADCx->CFGR1, ADC_CFGR1_CONT);
 
-	CLEAR_BIT(DMA_Channelx->CCR, DMA_CCR_EN);                    // Disable channel first for configuration
+	CLEAR_BIT(DMA_Channelx->CCR, DMA_CCR_EN);                    //Disable channel first for configuration
 
 	WRITE_REG(DMA_Channelx->CPAR, (uint32_t)&ADCx->DR);          //Set the peripheral register address in the DMA_CPARx register.
 	WRITE_REG(DMA_Channelx->CMAR, (uint32_t)pData);              //Set the memory address in the DMA_CMARx register.
@@ -98,12 +139,17 @@ void ADC_Start_DMA(ADC_TypeDef *ADCx, DMA_Channel_TypeDef *DMA_Channelx, uint32_
 	/*
 	 * ADC Conversions
 	 */
-	CLEAR_BIT(ADCx->CFGR1, ADC_CFGR1_DMACFG);                     //0: DMA one shot mode selected /****************************
+	CLEAR_BIT(ADCx->CFGR1, ADC_CFGR1_DMACFG);                     //0: DMA one shot mode selected /***********************
 	SET_BIT(ADCx->CFGR1, ADC_CFGR1_DMAEN);                        //1: Direct memory access EN
 	SET_BIT(ADCx->CR, ADC_CR_ADSTART);                            //Starting conversions (ADSTART)
 
 }
-
+/* ────────────────────────────────────────────────────────────── /
+ * Function : ADC_Stop_DMA()
+ * Purpose  : Stopping ADC conversions with DMA
+ * Details  : Disables DMA
+ * Runtime  : ~X.Xxx ms
+ * ────────────────────────────────────────────────────────────── */
 void ADC_Stop_DMA(ADC_TypeDef *ADCx)
 {
 	CLEAR_BIT(ADCx->CFGR1, ADC_CFGR1_DMAEN);                       //0: Direct memory access Disable
@@ -112,5 +158,11 @@ void ADC_Stop_DMA(ADC_TypeDef *ADCx)
 	CLEAR_BIT(DMA1_Channel1->CCR, DMA_CCR_EN);                     //0: Channel Disable
 }
 
+/* ────────────────────────────────────────────────────────────── /
+ * Function : ADC_Stop_DMA()
+ * Purpose  : Stopping ADC conversions with DMA
+ * Details  : Disables DMA
+ * Runtime  : ~X.Xxx ms
+ * ────────────────────────────────────────────────────────────── */
 
 

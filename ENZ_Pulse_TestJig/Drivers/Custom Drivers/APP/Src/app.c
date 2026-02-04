@@ -35,6 +35,8 @@
 #include "dma.h"
 #include "tim.h"
 #include "stdlib.h"
+#include "ui.h"
+
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
 /*                                           VARIABLES                                                      */
@@ -57,8 +59,14 @@ ENZ_TST_JIG EVENT = SCAN;
 
 static uint16_t ADCSampleCnt;
 
+volatile uint8_t RxBuffer[13];
 
+volatile int64_t  DruidSerialNumber;
+volatile bool SerNumRcvd;
+volatile bool ST_to_Pi_Tx_Msg_Cmplt;
+volatile bool ST_to_Druid_Prgmng_Cmplt;
 
+char ST_to_Pi_TxMsg[100];
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
 /*                                           HIGH-LEVEL FUNCTIONS                                           */
@@ -92,8 +100,8 @@ void ENZ_PULSE_EVENTS(void)
 				EVENT= SECOND_PULSE;
 			}
 		}
+		ST_to_Pi_Tx_Msg_Cmplt = false;
 		break;
-
 	case FIRST_PULSE:
 		if(ADC_Cmplt) {
 			if(ENZ.PULSE[ENZ_MAX_PULSE_LENGHT - 1 ] > 50 && ENZ.PULSE[ENZ_MAX_PULSE_LENGHT - 2] > 50 && ENZ.PULSE[ENZ_MAX_PULSE_LENGHT - 3] > 50)
@@ -122,7 +130,6 @@ void ENZ_PULSE_EVENTS(void)
 			EVENT = SCAN;                                            //SCAN for the 2nd PULSE to get ENZ.PULSE_T
 		}
 		break;
-
 	case SECOND_PULSE:
 		if(ENZ.PULSE_CNT==2)
 		{
@@ -141,11 +148,38 @@ void ENZ_PULSE_EVENTS(void)
 			EVENT = DATA_PROCESSING;
 		}
 		break;
-
 	case DATA_PROCESSING:
 		if((ENZ.PULSE_T > ENZ_PULSE_PERIOD_THR ) && (ENZ.PULSE_Width < ENZ_PULSE_WIDTH_THR) && (ENZ.Energy_J < ENZ_PULSE_ENERGY_THR ))
 		{
 			ENZ_PASSED();
+			if(PI_ON)
+			{
+				GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_RESET);
+				char ST_to_Pi_TxMsg[100];
+				char SerNum[13];
+
+				while(!ST_to_Pi_Tx_Msg_Cmplt)                         //Block Until Serial Num is Rcvd and when Tx is Cmplt
+				{
+					if(SerNumRcvd)
+					{
+						SerialNumConvToStr(DruidSerialNumber, SerNum);
+						snprintf(ST_to_Pi_TxMsg, sizeof(ST_to_Pi_TxMsg),
+								"%s,%u,%u,%lu,%lu,%lu\n",
+								SerNum,
+								ENZ.V_Peak,
+								ENZ.I_Peak,
+								(uint32_t)(ENZ.Energy_J * 100),
+								(uint32_t)(ENZ.PULSE_Width * 1000000),
+								ENZ.PULSE_T);
+
+						UART_Transmit_DMA(USART2, (uint8_t *)ST_to_Pi_TxMsg, strlen(ST_to_Pi_TxMsg) );
+						UART_Receive_DMA(USART2,  RxBuffer, 13);
+						DruidSerialNumber = 0;
+						SerNumRcvd = false;
+					}
+
+				}
+			}
 		}
 		else
 		{
@@ -162,8 +196,48 @@ void ENZ_PULSE_EVENTS(void)
 		ENZ.PULSE_Width = 0;
 		ENZ.PULSE_T = 0;
 		ADC1_Start();
-		EVENT = SCAN;
+
+		if(!PI_ON)
+		{
+			EVENT = SCAN;
+		}
+		else
+		{
+			while(!(BUTTON_STATE == SHORT_PRESS))
+			{
+				BUTTON_STATES();
+			}
+		}
+
 		break;
 	}
 }
 
+void SerialNumConvToStr(int64_t N, char *str)
+{
+	int i = 0;
+	int64_t sign = N;
+
+	if (N < 0)
+		N = -N;
+
+	if (N == 0) {
+		str[i++] = '0';
+	}
+
+	while (N > 0) {
+		str[i++] = (N % 10) + '0';
+		N /= 10;
+	}
+
+	if (sign < 0)
+		str[i++] = '-';
+
+	str[i] = '\0';
+
+	for (int j = 0, k = i - 1; j < k; j++, k--) {
+		char tmp = str[j];
+		str[j] = str[k];
+		str[k] = tmp;
+	}
+}

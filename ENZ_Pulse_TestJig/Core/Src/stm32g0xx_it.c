@@ -26,6 +26,7 @@
 #include "app.h"
 #include "tim.h"
 #include "ui.h"
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -157,7 +158,7 @@ void DMA1_Channel1_IRQHandler(void)
 	{
 		ENZ.PulseActive = false;
 		ADC_Cmplt = true;
-		SET_BIT(DMA1->IFCR, DMA_IFCR_CGIF1);
+		SET_BIT(DMA1->IFCR, DMA_IFCR_CGIF1);                         //Clear ISR Flag for DMA1 Channel 2
 		ADC1_Start();
 	}
 }
@@ -215,6 +216,43 @@ void TIM16_IRQHandler(void)
 
 }
 
+void DMA1_Channel2_3_IRQHandler(void)
+{
+	if (READ_BIT(DMA1->ISR, DMA_ISR_TCIF2))
+	{
+		if(PI_ON)
+		{
+			for (int i = 0; i < 13; i++)
+			{   //RxBuffer[i] - '0' = 'X'- 48 = Y(int type)
+				DruidSerialNumber = (DruidSerialNumber * 10) + (RxBuffer[i] - '0');
+			}   // Num ASCII OPs results in Num int
+			SerNumRcvd = true;
+		}
+		else
+		{
+			Pi_Status = 0;
+			for (int i = 0; i < 3; i++)
+			{   //RxBuffer[i] - '0' = 'X'- 48 = Y(int type)
+				Pi_Status = (Pi_Status * 10) + (Rx_Pi_Status[i] - '0');
+			}   // Num ASCII OPs results in Num int
+
+			if(Pi_Status == 100)
+			{
+				PI_ON = true;
+			}
+		}
+
+		SET_BIT(DMA1->IFCR, DMA_IFCR_CGIF2);                         //Clear ISR Flag for DMA1 Channel 2
+	}
+
+	if (READ_BIT(DMA1->ISR, DMA_ISR_TCIF3))
+	{
+
+		ST_to_Pi_Tx_Msg_Cmplt = true;
+
+		SET_BIT(DMA1->IFCR, DMA_IFCR_CGIF3);                         //Clear ISR Flag for DMA1 Channel 3
+	}
+}
 //void SysTick_Handler(void){
 //
 //}

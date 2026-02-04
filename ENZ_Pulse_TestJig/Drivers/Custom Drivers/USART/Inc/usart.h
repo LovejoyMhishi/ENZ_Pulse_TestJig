@@ -50,6 +50,7 @@
 #define USART_BRR(CLK, BAUD)                 ((CLK + ((BAUD) / 2U)) / (BAUD))
 
 
+
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
 /*                                           LOW-LEVEL FUNCTIONS                                            */
@@ -57,5 +58,7 @@
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 
 void USART_Init(void);
+void UART_Transmit(USART_TypeDef *USARTx, const uint8_t *pData, uint16_t Size);
 void UART_Transmit_DMA(USART_TypeDef *USARTx, const uint8_t *pData, uint16_t Size);
+void UART_Receive_DMA(USART_TypeDef *USARTx, uint8_t *pData, uint16_t Size);
 #endif /* CUSTOM_DRIVERS_USART_INC_USART_H_ */

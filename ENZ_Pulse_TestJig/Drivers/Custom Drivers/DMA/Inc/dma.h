@@ -45,6 +45,10 @@
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 #define ADC1_DR_ADDRESS                       (ADC1_BASE + 0x40UL)  //(uint32_t)&ADC1->DR;
 #define DMAMUX_ADC_DMA                        (5 << DMAMUX_CxCR_DMAREQ_ID_Pos)
+#define DMAMUX_USART1_RX_DMA                  (50 << DMAMUX_CxCR_DMAREQ_ID_Pos)
+#define DMAMUX_USART1_TX_DMA                  (51 << DMAMUX_CxCR_DMAREQ_ID_Pos)
+#define DMAMUX_USART2_RX_DMA                  (52 << DMAMUX_CxCR_DMAREQ_ID_Pos)
+#define DMAMUX_USART2_TX_DMA                  (53 << DMAMUX_CxCR_DMAREQ_ID_Pos)
 
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/

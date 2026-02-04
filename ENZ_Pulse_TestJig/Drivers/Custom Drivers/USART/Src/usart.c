@@ -47,6 +47,13 @@
 /*																										    */
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 
+
+/* ────────────────────────────────────────────────────────────── /
+ * Function : ADC_Stop_DMA()
+ * Purpose  : Stopping ADC conversions with DMA
+ * Details  : Disables DMA
+ * Runtime  : ~X.Xxx ms
+ * ────────────────────────────────────────────────────────────── */
 void USART_Init(void) {
 	SET_BIT(RCC->APBENR1, RCC_APBENR1_USART2EN);                   //
 	CLEAR_BIT(USART2->CR1, USART_CR1_M0 | USART_CR1_M1);           //M[1:0] = ‘00’: 1 start bit, 8 Data bits, n Stop bit
@@ -57,15 +64,57 @@ void USART_Init(void) {
 	SET_BIT(USART2->CR1, USART_CR1_TE);                            //1: Transmitter is enabled
 }
 
-void UART_Transmit_DMA(USART_TypeDef *USARTx, const uint8_t *pData, uint16_t Size) {
-
+/* ────────────────────────────────────────────────────────────── /
+ * Function : ADC_Stop_DMA()
+ * Purpose  : Stopping ADC conversions with DMA
+ * Details  : Disables DMA
+ * Runtime  : ~X.Xxx ms
+ * ────────────────────────────────────────────────────────────── */
+void UART_Transmit(USART_TypeDef *USARTx, const uint8_t *pData, uint16_t Size)
+{
 	while(Size--) {
 		while( !( USARTx->ISR & USART_ISR_TXE_TXFNF ) ) {}           //Wait for TXE=1:TDR is empty
 
 		WRITE_REG(USARTx->TDR, *pData++);                            //Take the value pointed to by pData
-
 	}
-
 }
 
+/* ────────────────────────────────────────────────────────────── /
+ * Function : ADC_Stop_DMA()
+ * Purpose  : Stopping ADC conversions with DMA
+ * Details  : Disables DMA
+ * Runtime  : ~X.Xxx ms
+ * ────────────────────────────────────────────────────────────── */
+void UART_Transmit_DMA(USART_TypeDef *USARTx, const uint8_t *pData, uint16_t Size)
+{
+	SET_BIT(USART2->CR3, USART_CR3_DMAT);                        //1: DMA mode is enabled for transmission
 
+
+	CLEAR_BIT(DMA1_Channel3->CCR, DMA_CCR_EN);                    //Disable channel first for configuration
+
+	WRITE_REG(DMA1_Channel3->CPAR, (uint32_t)&USARTx->TDR);       //Set the peripheral register address in the DMA_CPARx register.
+	WRITE_REG(DMA1_Channel3->CMAR, (uint32_t)pData);              //Set the memory address in the DMA_CMARx register.
+	WRITE_REG(DMA1_Channel3->CNDTR, Size);                        //Configure the total number of data to transfer in the DMA_CNDTRx register.
+	SET_BIT(DMA1_Channel3->CCR, DMA_CCR_EN);                      //1: Channel EN
+}
+
+/* ────────────────────────────────────────────────────────────── /
+ * Function : ADC_Stop_DMA()
+ * Purpose  : Stopping ADC conversions with DMA
+ * Details  : Disables DMA
+ * Runtime  : ~X.Xxx ms
+ * ────────────────────────────────────────────────────────────── */
+void UART_Receive_DMA(USART_TypeDef *USARTx, uint8_t *pData, uint16_t Size)
+{
+	SET_BIT(USARTx->CR1, USART_CR1_RE);                           //1: Receiver is enabled and begins searching for a start bit
+	SET_BIT(USARTx->CR3, USART_CR3_DMAR);                         //1: DMA mode is enabled for Receiving
+
+	CLEAR_BIT(DMA1_Channel2->CCR, DMA_CCR_EN);                    //Disable channel first for configuration
+
+	WRITE_REG(DMA1_Channel2->CPAR, (uint32_t)&USARTx->RDR);       //Set the peripheral register address in the DMA_CPARx register.
+	WRITE_REG(DMA1_Channel2->CMAR, (uint32_t)pData);              //Set the memory address in the DMA_CMARx register.
+	WRITE_REG(DMA1_Channel2->CNDTR, Size);                        //Configure the total number of data to transfer in the DMA_CNDTRx register.
+
+
+	SET_BIT(DMA1_Channel2->CCR, DMA_CCR_EN);                      //1: Channel EN
+}

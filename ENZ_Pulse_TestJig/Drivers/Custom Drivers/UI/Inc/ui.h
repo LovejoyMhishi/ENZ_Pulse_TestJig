@@ -25,8 +25,9 @@
 #ifndef CUSTOM_DRIVERS_UI_INC_UI_H_
 #define CUSTOM_DRIVERS_UI_INC_UI_H_
 
-
+#include <stdbool.h>
 #include "stm32g030xx.h"
+#include "gpio.h"
 
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
@@ -48,6 +49,9 @@ typedef enum{
 	LONG_PRESS
 }ST_BUTTON;
 
+extern volatile bool PI_ON;
+extern volatile uint8_t Rx_Pi_Status[3];
+extern volatile uint8_t Pi_Status;
 extern volatile ST_BUTTON BUTTON_STATE;
 extern volatile ButtonState Button;
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */

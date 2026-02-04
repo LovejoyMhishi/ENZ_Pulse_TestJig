@@ -95,14 +95,13 @@ int main(void)
 
 	ADC_AWD_Thrds_Config();
 	/* USER CODE END SysInit */
-
 	/* Initialize all configured peripherals */
 	/* USER CODE BEGIN 2 */
 
+
 	ADC1_Start();
 	GPIO_Writepin(GPIOA, LED_3, GPIO_PIN_SET);
-
-	//GPIO_Writepin(GPIOA, Plus_5V_EN , GPIO_PIN_SET);
+	//UART_Receive_DMA(USART2,  RxBuffer, 13);
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -113,7 +112,12 @@ int main(void)
 		ENZ_PULSE_EVENTS();
 		BUTTON_STATES();
 		/* USER CODE END WHILE */
+		//		UART_Transmit_DMA(USART2, (uint8_t *)ST_to_Pi_TxMsg,  strlen(ST_to_Pi_TxMsg));
 
+
+//		UART_Transmit_DMA(USART2, (uint8_t *)ST_to_Pi_TxMsg,  strlen(ST_to_Pi_TxMsg));
+//				TimeOut(2000);
+		//		UART_Transmit_DMA(USART2, "hi\n",  3);
 		/* USER CODE BEGIN 3 */
 	}
 	/* USER CODE END 3 */
@@ -167,7 +171,7 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 int __io_putchar(int ch) {
-	UART_Transmit_DMA(USART2, (uint8_t *)&ch, 1);
+	UART_Transmit(USART2, (uint8_t *)&ch, 1);
 	return ch;
 }
 /* USER CODE END 4 */

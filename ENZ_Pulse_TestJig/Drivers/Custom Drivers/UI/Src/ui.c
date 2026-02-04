@@ -33,7 +33,7 @@
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 
 #include "ui.h"
-#include "gpio.h"
+
 #include "tim.h"
 #include  "adc.h"
 #include "app.h"
@@ -45,12 +45,20 @@ volatile ButtonState Button = {
 };
 
 volatile ST_BUTTON BUTTON_STATE = IDLE;
-
+volatile bool PI_ON = false;
+volatile uint8_t Rx_Pi_Status[3];
+volatile uint8_t Pi_Status;
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
 /*                                           HIGH-LEVEL FUNCTIONS                                           */
 /*																										    */
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────────── /
+ * Function : BUTTON_STATES()
+ * Purpose  : SCANs & PROCESS the BUTTON_STATEs
+ * Details  : Returns a SHORT_/LONG_PRESS BUTTON_STATEs
+ * Runtime  : ~X.Xxx
+ * ────────────────────────────────────────────────────────────── */
 
 void BUTTON_STATES(void)
 {
@@ -71,6 +79,7 @@ void BUTTON_STATES(void)
 			if(Button.StateHistory >= BUTTON_LONG_PRESS)
 			{
 				BUTTON_STATE = LONG_PRESS;
+
 			}
 			else if((Button.StateHistory & BUTTON_SHORT_PRESS) >= 0x1F)
 			{
@@ -86,16 +95,86 @@ void BUTTON_STATES(void)
 		}
 		break;
 	case SHORT_PRESS:
-		ENZ_PASSED();
+		if(PI_ON)
+		{
+			ENZ.V_Peak = 0;
+			ENZ.I_Peak = 0;
+			ENZ.Energy_J = 0;
+			ENZ.ADC_Peak = 0;
+			ENZ.PULSE_CNT = 0;
+			ENZ.PULSE_Width = 0;
+			ENZ.PULSE_T = 0;
+			GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_SET);
+			EVENT = SCAN;                                    //Test the next Druid:
+		}
 		BUTTON_STATE = IDLE;
 		break;
 
 	case LONG_PRESS:
-		ENZ_FAILED();
+		if(PI_ON)
+		{
+			GPIO_Writepin(GPIOA, Plus_5V_EN , GPIO_PIN_RESET);
+			GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_RESET);
+			TimeOut(1000);
+			GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_SET);
+			PI_ON = false;
+		}
+		else
+		{
+			GPIO_Writepin(GPIOA, Plus_5V_EN , GPIO_PIN_SET);
+
+			UART_Receive_DMA(USART2,  Rx_Pi_Status, 3);
+			SET_BIT(TIM3->CR1, TIM_CR1_CEN);
+			TimeOut(800);
+			CLEAR_BIT(TIM3->CR1, TIM_CR1_CEN);
+
+			while (!PI_ON)
+			{
+				GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_RESET);
+				TimeOut(500);            //Wait for the Pi to turn ON
+				GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_SET);
+				TimeOut(500);
+				GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_RESET);
+				TimeOut(500);            //Wait for the Pi to turn ON
+				GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_SET);
+				TimeOut(500);
+			}//Exits the moment the Pi turns ON
+
+			GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_SET);
+			GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_SET);
+
+			GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_RESET);
+			SET_BIT(TIM3->CR1, TIM_CR1_CEN);
+			TimeOut(100);
+			CLEAR_BIT(TIM3->CR1, TIM_CR1_CEN);
+			TimeOut(800);
+			GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_SET);
+
+			GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_RESET);
+			SET_BIT(TIM3->CR1, TIM_CR1_CEN);
+			TimeOut(100);
+			CLEAR_BIT(TIM3->CR1, TIM_CR1_CEN);
+			TimeOut(800);
+
+			GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_RESET);
+			SET_BIT(TIM3->CR1, TIM_CR1_CEN);
+			TimeOut(1000);
+			CLEAR_BIT(TIM3->CR1, TIM_CR1_CEN);
+			GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_SET);
+			GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_SET);
+			UART_Receive_DMA(USART2,  RxBuffer, 13);
+		}
 		BUTTON_STATE = IDLE;
 		break;
 	}
 }
+
+/* ────────────────────────────────────────────────────────────── /
+ * Function : ENZ_PASSED()
+ * Purpose  : UI for ENZ testing
+ * Details  : Turns LED & beep once if ENZ passed the test
+ * Runtime  : ~X.Xxx
+ * ────────────────────────────────────────────────────────────── */
 void ENZ_PASSED(void)
 {
 	GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_RESET);
@@ -106,7 +185,12 @@ void ENZ_PASSED(void)
 	GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_SET);
 }
 
-
+/* ────────────────────────────────────────────────────────────── /
+ * Function : ENZ_FAILED()
+ * Purpose  : UI for ENZ testing
+ * Details  : Turns LED & beep thrice if ENZ failed the test
+ * Runtime  : ~X.Xxx
+ * ────────────────────────────────────────────────────────────── */
 void ENZ_FAILED(void)
 {
 	GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_RESET);

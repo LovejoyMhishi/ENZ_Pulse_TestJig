@@ -76,6 +76,12 @@ typedef enum {
 extern volatile Energizer ENZ;
 extern ENZ_TST_JIG EVENT;
 
+
+extern volatile uint8_t RxBuffer[13];
+extern volatile int64_t  DruidSerialNumber;
+extern volatile bool SerNumRcvd;
+extern volatile bool ST_to_Pi_Tx_Msg_Cmplt;
+extern volatile bool ST_to_Druid_Prgmng_Cmplt;
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
 /*                                           HIGH-LEVEL FUNCTIONS                                           */
@@ -94,6 +100,8 @@ __STATIC_INLINE void ENZ_PULSE_CNT(void)
 	ENZ.PULSE_CNT++;
 	NVIC_DisableIRQ(ADC1_IRQn);                                      //Disable ADC1 IRQ***********************
 }
+
+void SerialNumConvToStr(int64_t N, char *str);
 
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
