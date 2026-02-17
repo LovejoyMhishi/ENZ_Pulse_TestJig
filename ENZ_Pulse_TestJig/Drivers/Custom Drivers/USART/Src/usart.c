@@ -115,6 +115,5 @@ void UART_Receive_DMA(USART_TypeDef *USARTx, uint8_t *pData, uint16_t Size)
 	WRITE_REG(DMA1_Channel2->CMAR, (uint32_t)pData);              //Set the memory address in the DMA_CMARx register.
 	WRITE_REG(DMA1_Channel2->CNDTR, Size);                        //Configure the total number of data to transfer in the DMA_CNDTRx register.
 
-
 	SET_BIT(DMA1_Channel2->CCR, DMA_CCR_EN);                      //1: Channel EN
 }

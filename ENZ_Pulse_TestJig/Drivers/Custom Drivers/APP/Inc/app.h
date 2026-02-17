@@ -44,9 +44,17 @@
 #define ADC_TO_VOLTAGE_SCALE                ((V_REF_plus*VOLTAGE_DIVIDER_GAIN) / ADC_MAX )
 
 
-#define ENZ_PULSE_PERIOD_THR                 1000000           //1,000,000 µs: ENZ_PULSE_FREQ = 1Hz
-#define ENZ_PULSE_WIDTH_THR                  0.000390625       //390.625μs: max(Wizord 2/4, Merlin 2/4 & Druid 25/28)
-#define ENZ_PULSE_ENERGY_THR                 5
+#define WIZARDx_PULSE_PERIOD_THR             1000000           //1,000,000 µs: ENZ_PULSE_FREQ = 1Hz
+#define WIZARDx_PULSE_WIDTH_THR              0.000390625       //390.625μs: max(Wizord 2/4, Merlin 2/4 & Druid 25/28)
+#define WIZRADx_PULSE_ENERGY_THR             5
+
+#define DRUIDx_PULSE_PERIOD_THR              1000000           //1,000,000 µs: ENZ_PULSE_FREQ = 1Hz
+#define DRUIDx_PULSE_WIDTH_THR               0.000390625       //390.625μs: max(Wizord 2/4, Merlin 2/4 & Druid 25/28)
+#define DRUIDx_PULSE_ENERGY_THR              8
+
+#define MERLINx_PULSE_PERIOD_THR             1000000           //1,000,000 µs: ENZ_PULSE_FREQ = 1Hz
+#define MERLINx_PULSE_WIDTH_THR              0.000390625       //390.625μs: max(Wizord 2/4, Merlin 2/4 & Druid 25/28)
+#define MERLINx_PULSE_ENERGY_THR             10
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
 /*                                          DATA PROCESSING                                                 */
@@ -65,6 +73,12 @@ typedef struct{
 	bool PulseActive;
 }Energizer;
 
+typedef struct{
+	uint32_t ENZ_PULSE_PERIOD;
+	double ENZ_PULSE_WIDTH;
+	uint8_t ENZ_PULSE_ENERGY;
+}EnergizerThresholds;
+
 typedef enum {
 	SCAN = 0,
 	FIRST_PULSE ,
@@ -74,6 +88,7 @@ typedef enum {
 
 
 extern volatile Energizer ENZ;
+extern volatile EnergizerThresholds THR;
 extern ENZ_TST_JIG EVENT;
 
 

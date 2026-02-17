@@ -202,7 +202,12 @@ void ADC_AWD_Thrds_Config(void)
 	 */
 	NVIC_SetPriority(ADC1_IRQn, 3);
 }
-
+/* ────────────────────────────────────────────────────────────── /
+ * Function : ADC_AWD_Thrds_Clear()
+ * Purpose  : AWD Thresholds clear
+ * Details  : No intrpts will be triggered if thrshlds are crossed
+ * Runtime  : ~X.Xxx
+ * ────────────────────────────────────────────────────────────── */
 void ADC_AWD_Thrds_Clear(void)
 {
 	ADC1_Stop();

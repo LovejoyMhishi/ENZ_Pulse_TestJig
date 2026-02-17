@@ -34,7 +34,12 @@
 #include "stm32g030xx.h"
 #include "stm32g0xx_hal.h"
 
-
+/* ────────────────────────────────────────────────────────────── /
+ * Function : TIM3_Init()
+ * Purpose  : Initialize TIM3
+ * Details  : ----
+ * Runtime  : ~X.Xxx
+ * ────────────────────────────────────────────────────────────── */
 void TIM3_Init(void)
 {
 	CLEAR_BIT(TIM3->CR1, TIM_CR1_CEN);                                //Ensure that the Timer's Counter is OFF
@@ -56,6 +61,12 @@ void TIM3_Init(void)
 	SET_BIT(TIM3->EGR, TIM_EGR_UG);                                   // Force update event
 }
 
+/* ────────────────────────────────────────────────────────────── /
+ * Function : TIM14_Init()
+ * Purpose  : Initialize TIM14
+ * Details  : ----
+ * Runtime  : ~X.Xxx
+ * ────────────────────────────────────────────────────────────── */
 void TIM14_Init(void)
 {
 	CLEAR_BIT(TIM14->CR1, TIM_CR1_CEN);                               //Ensure that the Timer's Counter is OFF
@@ -73,8 +84,12 @@ void TIM14_Init(void)
 	NVIC_SetPriority(TIM14_IRQn, 2);
 	NVIC_EnableIRQ(TIM14_IRQn);
 }
-
-
+/* ────────────────────────────────────────────────────────────── /
+ * Function : TIM16_Init()
+ * Purpose  : Initialize TIM16
+ * Details  : ----
+ * Runtime  : ~X.Xxx
+ * ────────────────────────────────────────────────────────────── */
 void TIM16_Init(void)
 {
 	CLEAR_BIT(TIM16->CR1, TIM_CR1_CEN);                               //Ensure that the Timer's Counter is OFF
@@ -92,7 +107,3 @@ void TIM16_Init(void)
 	NVIC_SetPriority(TIM16_IRQn, 2);
 	NVIC_EnableIRQ(TIM16_IRQn);
 }
-
-
-
-

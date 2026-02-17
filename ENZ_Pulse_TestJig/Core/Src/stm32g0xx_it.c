@@ -227,6 +227,8 @@ void DMA1_Channel2_3_IRQHandler(void)
 				DruidSerialNumber = (DruidSerialNumber * 10) + (RxBuffer[i] - '0');
 			}   // Num ASCII OPs results in Num int
 			SerNumRcvd = true;
+
+
 		}
 		else
 		{
@@ -236,8 +238,32 @@ void DMA1_Channel2_3_IRQHandler(void)
 				Pi_Status = (Pi_Status * 10) + (Rx_Pi_Status[i] - '0');
 			}   // Num ASCII OPs results in Num int
 
-			if(Pi_Status == 100)
+			if(Pi_Status >= 100)
 			{
+				if(Pi_Status == 101)
+				{
+					//Do nothing
+				}
+
+				if(Pi_Status == 103)
+				{
+					THR.ENZ_PULSE_PERIOD = DRUIDx_PULSE_PERIOD_THR;
+					THR.ENZ_PULSE_WIDTH = DRUIDx_PULSE_WIDTH_THR ;
+					THR.ENZ_PULSE_ENERGY = DRUIDx_PULSE_ENERGY_THR;
+				}
+
+				if(Pi_Status == 105)
+				{
+					THR.ENZ_PULSE_PERIOD = MERLINx_PULSE_PERIOD_THR;
+					THR.ENZ_PULSE_WIDTH  = MERLINx_PULSE_WIDTH_THR ;
+					THR.ENZ_PULSE_ENERGY = MERLINx_PULSE_ENERGY_THR;
+				}
+				if(Pi_Status == 107)
+				{
+					THR.ENZ_PULSE_PERIOD = WIZARDx_PULSE_PERIOD_THR;
+					THR.ENZ_PULSE_WIDTH  = WIZARDx_PULSE_WIDTH_THR ;
+					THR.ENZ_PULSE_ENERGY = WIZRADx_PULSE_ENERGY_THR;
+				}
 				PI_ON = true;
 			}
 		}

@@ -33,7 +33,12 @@
 
 #include "gpio.h"
 
-
+/* ────────────────────────────────────────────────────────────── /
+ * Function : GPIO_Init()
+ * Purpose  : Initialize GPIO Pins for use
+ * Details  : Configures GPIO Pins
+ * Runtime  : ~X.Xxx
+ * ────────────────────────────────────────────────────────────── */
 void GPIO_Init(void)
 {
 	/*
@@ -142,7 +147,12 @@ void GPIO_Init(void)
 	 */
 
 }
-
+/* ────────────────────────────────────────────────────────────── /
+ * Function : GPIO_Writepin()
+ * Purpose  : Writes a 1 0r 0 on a GPPIO Pin
+ * Details  : Changes Pin Output State
+ * Runtime  : ~X.Xxx
+ * ────────────────────────────────────────────────────────────── */
 void GPIO_Writepin(GPIO_TypeDef *GPIOx, uint16_t Pin, GPIO_PinState State)
 {
 	if(State == GPIO_PIN_SET)

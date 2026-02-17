@@ -45,7 +45,7 @@
 
 #define t_ADCVREG_SETUP                      2		// 2ms
 #define V_REF_plus                           3.3f   // Internal Voltage Reference
-#define ADC_MAX                              4095
+#define ADC_MAX                              4095   //12 Bit res max ADC val
 
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/

@@ -157,12 +157,3 @@ void ADC_Stop_DMA(ADC_TypeDef *ADCx)
 	while (ADCx->CR & ADC_CR_ADSTART);
 	CLEAR_BIT(DMA1_Channel1->CCR, DMA_CCR_EN);                     //0: Channel Disable
 }
-
-/* ────────────────────────────────────────────────────────────── /
- * Function : ADC_Stop_DMA()
- * Purpose  : Stopping ADC conversions with DMA
- * Details  : Disables DMA
- * Runtime  : ~X.Xxx ms
- * ────────────────────────────────────────────────────────────── */
-
-

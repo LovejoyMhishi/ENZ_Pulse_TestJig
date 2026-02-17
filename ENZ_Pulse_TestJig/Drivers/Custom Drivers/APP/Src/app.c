@@ -55,6 +55,12 @@ volatile Energizer ENZ = {
 		.PulseActive = false
 };
 
+volatile EnergizerThresholds THR = {                          //Defaut to Testing the Wizards
+		.ENZ_PULSE_PERIOD = WIZARDx_PULSE_PERIOD_THR,
+		.ENZ_PULSE_WIDTH = WIZARDx_PULSE_WIDTH_THR ,
+		.ENZ_PULSE_ENERGY = WIZRADx_PULSE_ENERGY_THR
+};
+
 ENZ_TST_JIG EVENT = SCAN;
 
 static uint16_t ADCSampleCnt;
@@ -149,7 +155,7 @@ void ENZ_PULSE_EVENTS(void)
 		}
 		break;
 	case DATA_PROCESSING:
-		if((ENZ.PULSE_T > ENZ_PULSE_PERIOD_THR ) && (ENZ.PULSE_Width < ENZ_PULSE_WIDTH_THR) && (ENZ.Energy_J < ENZ_PULSE_ENERGY_THR ))
+		if((ENZ.PULSE_T > THR.ENZ_PULSE_PERIOD ) && (ENZ.PULSE_Width < THR.ENZ_PULSE_WIDTH) && (ENZ.Energy_J < THR.ENZ_PULSE_ENERGY ))
 		{
 			ENZ_PASSED();
 			if(PI_ON)
@@ -164,21 +170,22 @@ void ENZ_PULSE_EVENTS(void)
 					{
 						SerialNumConvToStr(DruidSerialNumber, SerNum);
 						snprintf(ST_to_Pi_TxMsg, sizeof(ST_to_Pi_TxMsg),
-								"%s,%u,%u,%lu,%lu,%lu\n",
+								"%s,%u,%u,%lu,%lu,%lu,%s\n",
 								SerNum,
 								ENZ.V_Peak,
 								ENZ.I_Peak,
 								(uint32_t)(ENZ.Energy_J * 100),
 								(uint32_t)(ENZ.PULSE_Width * 1000000),
-								ENZ.PULSE_T);
+								ENZ.PULSE_T, "PASS");
 
-						UART_Transmit_DMA(USART2, (uint8_t *)ST_to_Pi_TxMsg, strlen(ST_to_Pi_TxMsg) );
-						UART_Receive_DMA(USART2,  RxBuffer, 13);
+						UART_Transmit_DMA(USART2, (uint8_t *)ST_to_Pi_TxMsg, strlen(ST_to_Pi_TxMsg));
+						UART_Receive_DMA(USART2,  RxBuffer, 13);     //Start Expecting another Num
 						DruidSerialNumber = 0;
 						SerNumRcvd = false;
 					}
 
 				}
+				GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_SET);           //Turn Off STTUS LED After Successfluu receiving the SreiualNum
 			}
 		}
 		else
@@ -197,22 +204,18 @@ void ENZ_PULSE_EVENTS(void)
 		ENZ.PULSE_T = 0;
 		ADC1_Start();
 
-		if(!PI_ON)
-		{
-			EVENT = SCAN;
-		}
-		else
-		{
-			while(!(BUTTON_STATE == SHORT_PRESS))
-			{
-				BUTTON_STATES();
-			}
-		}
+		EVENT = SCAN;
 
 		break;
 	}
 }
 
+/* ────────────────────────────────────────────────────────────── /
+ * Function : SerialNumConvToStr()
+ * Purpose  : Converts int64 to str
+ * Details  : Changes the DRUIDx serial numbers to string
+ * Runtime  : ~X.Xxx
+ * ────────────────────────────────────────────────────────────── */
 void SerialNumConvToStr(int64_t N, char *str)
 {
 	int i = 0;

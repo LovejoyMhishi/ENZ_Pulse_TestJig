@@ -33,12 +33,14 @@
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 
 #include "ui.h"
-
 #include "tim.h"
 #include  "adc.h"
 #include "app.h"
-
-
+/* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
+/* 																											*/
+/*                                           DEFINES                                                        */
+/*                                                                                  						*/
+/* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 volatile ButtonState Button = {
 		.StateHistory = 0b0000000000000000,
 		.StateCount = 0
@@ -162,7 +164,7 @@ void BUTTON_STATES(void)
 			CLEAR_BIT(TIM3->CR1, TIM_CR1_CEN);
 			GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_SET);
 			GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_SET);
-			UART_Receive_DMA(USART2,  RxBuffer, 13);
+			UART_Receive_DMA(USART2,  RxBuffer, 13);                                //Start EXpecting a Serial Num after PI_ON
 		}
 		BUTTON_STATE = IDLE;
 		break;

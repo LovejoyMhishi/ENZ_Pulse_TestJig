@@ -59,12 +59,10 @@ void TIM3_Init(void);
 void TIM4_Init(void);
 void TIM16_Init(void);
 
-
 __STATIC_INLINE void TIMx_Start(TIM_TypeDef *TIMx)
 {
 	SET_BIT(TIMx->CR1, TIM_CR1_CEN);                                  //Start timer
 }
-
 
 __STATIC_INLINE void TIMx_Stop(TIM_TypeDef *TIMx)
 {
@@ -72,6 +70,5 @@ __STATIC_INLINE void TIMx_Stop(TIM_TypeDef *TIMx)
 	CLEAR_REG(TIMx->CNT);
 	CLEAR_BIT(TIMx->SR, TIM_SR_UIF);                                  // Clear update interrupt flag
 }
-
 
 #endif /* CUSTOM_DRIVERS_TIM_INC_TIMERS_H_ */
