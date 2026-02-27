@@ -101,6 +101,15 @@ int main(void)
 
 	ADC1_Start();
 	GPIO_Writepin(GPIOA, LED_3, GPIO_PIN_SET);
+
+	GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_RESET);
+	GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_RESET);
+	SET_BIT(TIM3->CR1, TIM_CR1_CEN);
+	TimeOut(100);
+	CLEAR_BIT(TIM3->CR1, TIM_CR1_CEN);
+	TimeOut(800);
+	GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_SET);
+	GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_SET);
 	//UART_Receive_DMA(USART2,  RxBuffer, 13);
 	/* USER CODE END 2 */
 

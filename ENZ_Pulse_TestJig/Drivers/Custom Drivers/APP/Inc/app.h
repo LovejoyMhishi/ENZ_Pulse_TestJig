@@ -30,6 +30,8 @@
 /*                                                                                  						*/
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 #include "adc.h"
+#include "gpio.h"
+#include "ui.h"
 #include "stm32g030xx.h"
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
@@ -55,6 +57,47 @@
 #define MERLINx_PULSE_PERIOD_THR             1000000           //1,000,000 µs: ENZ_PULSE_FREQ = 1Hz
 #define MERLINx_PULSE_WIDTH_THR              0.000390625       //390.625μs: max(Wizord 2/4, Merlin 2/4 & Druid 25/28)
 #define MERLINx_PULSE_ENERGY_THR             10
+
+
+
+#define WIZARD2_PULSE_ENERGY_MIN_THR         1.65
+#define WIZARD2_PULSE_ENERGY_MAX_THR         2.35
+
+#define WIZARD4_PULSE_ENERGY_MIN_THR         3.60
+#define WIZARD4_PULSE_ENERGY_MAX_THR         4.30
+
+#define DRUID12_PULSE_ENERGY_MIN_THR         1.70
+#define DRUID12_PULSE_ENERGY_MAX_THR         2.20
+
+#define DRUID13_PULSE_ENERGY_MIN_THR         2.70
+#define DRUID13_PULSE_ENERGY_MAX_THR         3.30
+
+#define DRUID15_PULSE_ENERGY_MIN_THR         4.40
+#define DRUID15_PULSE_ENERGY_MAX_THR         5.30
+
+#define DRUID18_PULSE_ENERGY_MIN_THR         7.2
+#define DRUID18_PULSE_ENERGY_MAX_THR         5.8
+
+#define DRUID25_PULSE_ENERGY_MIN_THR         2
+#define DRUID25_PULSE_ENERGY_MAX_THR         2.8
+
+#define DRUID28_PULSE_ENERGY_MIN_THR         3.4
+#define DRUID28_PULSE_ENERGY_MAX_THR         4.1
+
+#define DRUID114_PULSE_ENERGY_MIN_THR        5.4
+#define DRUID114_PULSE_ENERGY_MAX_THR        6.6
+
+#define MERLIN2_PULSE_ENERGY_MIN_THR         1.7
+#define MERLIN2_PULSE_ENERGY_MAX_THR         2.3
+
+#define MERLIN4_PULSE_ENERGY_MIN_THR         3.6
+#define MERLIN4_PULSE_ENERGY_MAX_THR         4.4
+
+#define MERLIN_STEALTH18_PULSE_ENERGY_MIN_THR 7.2
+#define MERLIN_STEALTH18_PULSE_ENERGY_MAX_THR 8.8
+
+#define MERLIN_STEALTH28_PULSE_ENERGY_MIN_THR 7.2
+#define MERLIN_STEALTH28_PULSE_ENERGY_MAX_THR 8.8
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
 /*                                          DATA PROCESSING                                                 */
@@ -76,7 +119,8 @@ typedef struct{
 typedef struct{
 	uint32_t ENZ_PULSE_PERIOD;
 	double ENZ_PULSE_WIDTH;
-	uint8_t ENZ_PULSE_ENERGY;
+	double ENZ_PULSE_ENERGY_MIN;
+	double ENZ_PULSE_ENERGY_MAX;
 }EnergizerThresholds;
 
 typedef enum {
@@ -105,6 +149,8 @@ extern volatile bool ST_to_Druid_Prgmng_Cmplt;
 
 void ENZ_PULSE_EVENTS(void);
 
+void ENZ_TestJig_CONFIG(void);
+
 __STATIC_INLINE void ENZ_PULSE_Counting(void)
 {
 	NVIC_EnableIRQ(ADC1_IRQn);                                       //Enable ADC1 IRQ************************
@@ -116,6 +162,16 @@ __STATIC_INLINE void ENZ_PULSE_CNT(void)
 	NVIC_DisableIRQ(ADC1_IRQn);                                      //Disable ADC1 IRQ***********************
 }
 
+__STATIC_INLINE void SWITCH_PI_ON(void)
+{
+	GPIO_Writepin(GPIOA, Plus_5V_EN , GPIO_PIN_SET);                 //SWITCH the Pi On for JIG Config
+}
+
+__STATIC_INLINE void SWITCH_PI_OFF(void)
+{
+	GPIO_Writepin(GPIOA, Plus_5V_EN , GPIO_PIN_RESET);               //SWITCH the Pi On OFF
+	PI_ON = false;
+}
 void SerialNumConvToStr(int64_t N, char *str);
 
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */

@@ -35,8 +35,10 @@
 #include "dma.h"
 #include "tim.h"
 #include "stdlib.h"
-#include "ui.h"
-
+#include "usart.h"
+#include "stdio.h"
+#include "helpers.h"
+#include "string.h"
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
 /*                                           VARIABLES                                                      */
@@ -58,7 +60,8 @@ volatile Energizer ENZ = {
 volatile EnergizerThresholds THR = {                          //Defaut to Testing the Wizards
 		.ENZ_PULSE_PERIOD = WIZARDx_PULSE_PERIOD_THR,
 		.ENZ_PULSE_WIDTH = WIZARDx_PULSE_WIDTH_THR ,
-		.ENZ_PULSE_ENERGY = WIZRADx_PULSE_ENERGY_THR
+		.ENZ_PULSE_ENERGY_MIN = WIZARD4_PULSE_ENERGY_MIN_THR,
+		.ENZ_PULSE_ENERGY_MAX = WIZARD4_PULSE_ENERGY_MAX_THR
 };
 
 ENZ_TST_JIG EVENT = SCAN;
@@ -155,7 +158,7 @@ void ENZ_PULSE_EVENTS(void)
 		}
 		break;
 	case DATA_PROCESSING:
-		if((ENZ.PULSE_T > THR.ENZ_PULSE_PERIOD ) && (ENZ.PULSE_Width < THR.ENZ_PULSE_WIDTH) && (ENZ.Energy_J < THR.ENZ_PULSE_ENERGY ))
+		if((ENZ.PULSE_T > THR.ENZ_PULSE_PERIOD ) && (ENZ.PULSE_Width < THR.ENZ_PULSE_WIDTH) && (ENZ.Energy_J > THR.ENZ_PULSE_ENERGY_MIN ) && (ENZ.Energy_J < THR.ENZ_PULSE_ENERGY_MAX))
 		{
 			ENZ_PASSED();
 			if(PI_ON)
@@ -179,13 +182,13 @@ void ENZ_PULSE_EVENTS(void)
 								ENZ.PULSE_T, "PASS");
 
 						UART_Transmit_DMA(USART2, (uint8_t *)ST_to_Pi_TxMsg, strlen(ST_to_Pi_TxMsg));
-						UART_Receive_DMA(USART2,  RxBuffer, 13);     //Start Expecting another Num
+						UART_Receive_DMA(USART2,  RxBuffer, 13);                                     //Start Expecting another Num
 						DruidSerialNumber = 0;
 						SerNumRcvd = false;
 					}
 
 				}
-				GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_SET);           //Turn Off STTUS LED After Successfluu receiving the SreiualNum
+				GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_SET);                 //Turn Off STTUS LED After Successfluu receiving the SreiualNum
 			}
 		}
 		else
@@ -207,6 +210,111 @@ void ENZ_PULSE_EVENTS(void)
 		EVENT = SCAN;
 
 		break;
+	}
+}
+
+/* ────────────────────────────────────────────────────────────── /
+ * Function : SerialNumConvToStr()
+ * Purpose  : Converts int64 to str
+ * Details  : Changes the DRUIDx serial numbers to string
+ * Runtime  : ~X.Xxx
+ * ────────────────────────────────────────────────────────────── */
+void ENZ_TestJig_CONFIG(void)
+{
+	if(memcmp((const void*)Rx_Pi_Status, "W002",4) == 0)                    //https://www.w3schools.com/c/ref_string_memcmp.php
+	{                                                                       //Rx_Pi_Status won't change when memcmp is running
+		THR.ENZ_PULSE_PERIOD = DRUIDx_PULSE_PERIOD_THR;
+		THR.ENZ_PULSE_WIDTH = DRUIDx_PULSE_WIDTH_THR ;
+		THR.ENZ_PULSE_ENERGY_MIN = WIZARD2_PULSE_ENERGY_MIN_THR;
+		THR.ENZ_PULSE_ENERGY_MAX = WIZARD2_PULSE_ENERGY_MAX_THR;
+	}
+	if(memcmp((const void*)Rx_Pi_Status, "W004",4) == 0)
+	{
+		THR.ENZ_PULSE_PERIOD = DRUIDx_PULSE_PERIOD_THR;
+		THR.ENZ_PULSE_WIDTH = DRUIDx_PULSE_WIDTH_THR ;
+		THR.ENZ_PULSE_ENERGY_MIN = WIZARD4_PULSE_ENERGY_MIN_THR;
+		THR.ENZ_PULSE_ENERGY_MAX = WIZARD4_PULSE_ENERGY_MAX_THR;
+	}
+
+	if(memcmp((const void*)Rx_Pi_Status, "D012",4) == 0)                      //DRUIDx
+	{
+		THR.ENZ_PULSE_PERIOD = DRUIDx_PULSE_PERIOD_THR;
+		THR.ENZ_PULSE_WIDTH = DRUIDx_PULSE_WIDTH_THR ;
+		THR.ENZ_PULSE_ENERGY_MIN = DRUID12_PULSE_ENERGY_MIN_THR;
+		THR.ENZ_PULSE_ENERGY_MAX = DRUID12_PULSE_ENERGY_MAX_THR;
+		SWITCH_PI_OFF();
+	}
+	if(memcmp((const void*)Rx_Pi_Status, "D015",4) == 0)
+	{
+		THR.ENZ_PULSE_PERIOD = DRUIDx_PULSE_PERIOD_THR;
+		THR.ENZ_PULSE_WIDTH = DRUIDx_PULSE_WIDTH_THR ;
+		THR.ENZ_PULSE_ENERGY_MIN = DRUID15_PULSE_ENERGY_MIN_THR;
+		THR.ENZ_PULSE_ENERGY_MAX = DRUID15_PULSE_ENERGY_MAX_THR;
+		SWITCH_PI_OFF();
+	}
+	if(memcmp((const void*)Rx_Pi_Status, "D018",4) == 0)
+	{
+		THR.ENZ_PULSE_PERIOD = DRUIDx_PULSE_PERIOD_THR;
+		THR.ENZ_PULSE_WIDTH = DRUIDx_PULSE_WIDTH_THR ;
+		THR.ENZ_PULSE_ENERGY_MIN = DRUID18_PULSE_ENERGY_MIN_THR;
+		THR.ENZ_PULSE_ENERGY_MAX = DRUID18_PULSE_ENERGY_MAX_THR;
+		SWITCH_PI_OFF();
+	}
+	if(memcmp((const void*)Rx_Pi_Status, "D025",4) == 0)
+	{
+		THR.ENZ_PULSE_PERIOD = DRUIDx_PULSE_PERIOD_THR;
+		THR.ENZ_PULSE_WIDTH = DRUIDx_PULSE_WIDTH_THR ;
+		THR.ENZ_PULSE_ENERGY_MIN = DRUID25_PULSE_ENERGY_MIN_THR;
+		THR.ENZ_PULSE_ENERGY_MAX = DRUID25_PULSE_ENERGY_MAX_THR;
+		SWITCH_PI_OFF();
+	}
+	if(memcmp((const void*)Rx_Pi_Status, "D028",4) == 0)
+	{
+		THR.ENZ_PULSE_PERIOD = DRUIDx_PULSE_PERIOD_THR;
+		THR.ENZ_PULSE_WIDTH = DRUIDx_PULSE_WIDTH_THR ;
+		THR.ENZ_PULSE_ENERGY_MIN = DRUID28_PULSE_ENERGY_MIN_THR;
+		THR.ENZ_PULSE_ENERGY_MAX = DRUID28_PULSE_ENERGY_MAX_THR;
+	}
+	if(memcmp((const void*)Rx_Pi_Status, "D114",4) == 0)
+	{
+		THR.ENZ_PULSE_PERIOD = DRUIDx_PULSE_PERIOD_THR;
+		THR.ENZ_PULSE_WIDTH = DRUIDx_PULSE_WIDTH_THR ;
+		THR.ENZ_PULSE_ENERGY_MIN = DRUID114_PULSE_ENERGY_MIN_THR;
+		THR.ENZ_PULSE_ENERGY_MAX = DRUID114_PULSE_ENERGY_MAX_THR;
+		SWITCH_PI_OFF();
+	}
+
+	if(memcmp((const void*)Rx_Pi_Status, "M002",4) == 0)                       //MERLINx
+	{
+		THR.ENZ_PULSE_PERIOD = DRUIDx_PULSE_PERIOD_THR;
+		THR.ENZ_PULSE_WIDTH = DRUIDx_PULSE_WIDTH_THR ;
+		THR.ENZ_PULSE_ENERGY_MIN = MERLIN2_PULSE_ENERGY_MIN_THR;
+		THR.ENZ_PULSE_ENERGY_MAX = MERLIN2_PULSE_ENERGY_MAX_THR;
+		SWITCH_PI_OFF();
+	}
+	if(memcmp((const void*)Rx_Pi_Status, "M004",4) == 0)
+	{
+		THR.ENZ_PULSE_PERIOD = DRUIDx_PULSE_PERIOD_THR;
+		THR.ENZ_PULSE_WIDTH = DRUIDx_PULSE_WIDTH_THR ;
+		THR.ENZ_PULSE_ENERGY_MIN = MERLIN4_PULSE_ENERGY_MIN_THR;
+		THR.ENZ_PULSE_ENERGY_MAX = MERLIN4_PULSE_ENERGY_MAX_THR;
+		SWITCH_PI_OFF();
+	}
+	if(memcmp((const void*)Rx_Pi_Status, "MS18",4) == 0)
+	{
+		THR.ENZ_PULSE_PERIOD = DRUIDx_PULSE_PERIOD_THR;
+		THR.ENZ_PULSE_WIDTH = DRUIDx_PULSE_WIDTH_THR ;
+		THR.ENZ_PULSE_ENERGY_MIN = MERLIN_STEALTH18_PULSE_ENERGY_MIN_THR;
+		THR.ENZ_PULSE_ENERGY_MAX = MERLIN_STEALTH18_PULSE_ENERGY_MAX_THR;
+		SWITCH_PI_OFF();
+	}
+	if(memcmp((const void*)Rx_Pi_Status, "MS28",4) == 0)
+	{
+		THR.ENZ_PULSE_PERIOD = DRUIDx_PULSE_PERIOD_THR;
+		THR.ENZ_PULSE_WIDTH = DRUIDx_PULSE_WIDTH_THR ;
+		THR.ENZ_PULSE_ENERGY_MIN = MERLIN_STEALTH28_PULSE_ENERGY_MIN_THR;
+		THR.ENZ_PULSE_ENERGY_MAX = MERLIN_STEALTH28_PULSE_ENERGY_MAX_THR;
+		SWITCH_PI_OFF();
 	}
 }
 

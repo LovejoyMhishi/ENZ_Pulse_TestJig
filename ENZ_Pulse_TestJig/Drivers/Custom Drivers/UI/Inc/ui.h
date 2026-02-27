@@ -54,7 +54,7 @@ typedef enum{
 /*																										    */
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 extern volatile bool PI_ON;
-extern volatile uint8_t Rx_Pi_Status[3];
+extern volatile uint8_t Rx_Pi_Status[4];
 extern volatile uint8_t Pi_Status;
 extern volatile ST_BUTTON BUTTON_STATE;
 extern volatile ButtonState Button;

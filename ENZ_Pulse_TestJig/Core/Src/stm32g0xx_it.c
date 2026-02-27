@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32g0xx_it.h"
+#include "string.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "adc.h"
@@ -227,53 +228,16 @@ void DMA1_Channel2_3_IRQHandler(void)
 				DruidSerialNumber = (DruidSerialNumber * 10) + (RxBuffer[i] - '0');
 			}   // Num ASCII OPs results in Num int
 			SerNumRcvd = true;
-
-
 		}
 		else
 		{
-			Pi_Status = 0;
-			for (int i = 0; i < 3; i++)
-			{   //RxBuffer[i] - '0' = 'X'- 48 = Y(int type)
-				Pi_Status = (Pi_Status * 10) + (Rx_Pi_Status[i] - '0');
-			}   // Num ASCII OPs results in Num int
-
-			if(Pi_Status >= 100)
-			{
-				if(Pi_Status == 101)
-				{
-					//Do nothing
-				}
-
-				if(Pi_Status == 103)
-				{
-					THR.ENZ_PULSE_PERIOD = DRUIDx_PULSE_PERIOD_THR;
-					THR.ENZ_PULSE_WIDTH = DRUIDx_PULSE_WIDTH_THR ;
-					THR.ENZ_PULSE_ENERGY = DRUIDx_PULSE_ENERGY_THR;
-				}
-
-				if(Pi_Status == 105)
-				{
-					THR.ENZ_PULSE_PERIOD = MERLINx_PULSE_PERIOD_THR;
-					THR.ENZ_PULSE_WIDTH  = MERLINx_PULSE_WIDTH_THR ;
-					THR.ENZ_PULSE_ENERGY = MERLINx_PULSE_ENERGY_THR;
-				}
-				if(Pi_Status == 107)
-				{
-					THR.ENZ_PULSE_PERIOD = WIZARDx_PULSE_PERIOD_THR;
-					THR.ENZ_PULSE_WIDTH  = WIZARDx_PULSE_WIDTH_THR ;
-					THR.ENZ_PULSE_ENERGY = WIZRADx_PULSE_ENERGY_THR;
-				}
-				PI_ON = true;
-			}
+			PI_ON = true;
 		}
-
 		SET_BIT(DMA1->IFCR, DMA_IFCR_CGIF2);                         //Clear ISR Flag for DMA1 Channel 2
 	}
 
 	if (READ_BIT(DMA1->ISR, DMA_ISR_TCIF3))
 	{
-
 		ST_to_Pi_Tx_Msg_Cmplt = true;
 
 		SET_BIT(DMA1->IFCR, DMA_IFCR_CGIF3);                         //Clear ISR Flag for DMA1 Channel 3

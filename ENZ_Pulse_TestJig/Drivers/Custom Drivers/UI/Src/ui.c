@@ -36,6 +36,8 @@
 #include "tim.h"
 #include  "adc.h"
 #include "app.h"
+#include "stdio.h"
+#include "usart.h"
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /* 																											*/
 /*                                           DEFINES                                                        */
@@ -48,7 +50,7 @@ volatile ButtonState Button = {
 
 volatile ST_BUTTON BUTTON_STATE = IDLE;
 volatile bool PI_ON = false;
-volatile uint8_t Rx_Pi_Status[3];
+volatile uint8_t Rx_Pi_Status[4];
 volatile uint8_t Pi_Status;
 /* ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 /*																											*/
@@ -115,17 +117,16 @@ void BUTTON_STATES(void)
 	case LONG_PRESS:
 		if(PI_ON)
 		{
-			GPIO_Writepin(GPIOA, Plus_5V_EN , GPIO_PIN_RESET);
+			SWITCH_PI_OFF();
 			GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_RESET);
 			TimeOut(1000);
 			GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_SET);
-			PI_ON = false;
 		}
 		else
 		{
-			GPIO_Writepin(GPIOA, Plus_5V_EN , GPIO_PIN_SET);
+			SWITCH_PI_ON();
 
-			UART_Receive_DMA(USART2,  Rx_Pi_Status, 3);
+			UART_Receive_DMA(USART2,  Rx_Pi_Status, 4);
 			SET_BIT(TIM3->CR1, TIM_CR1_CEN);
 			TimeOut(800);
 			CLEAR_BIT(TIM3->CR1, TIM_CR1_CEN);
@@ -141,6 +142,8 @@ void BUTTON_STATES(void)
 				GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_SET);
 				TimeOut(500);
 			}//Exits the moment the Pi turns ON
+
+			ENZ_TestJig_CONFIG();                                     //After the PI has been turned on the JIG is configured to test a particular ENZ
 
 			GPIO_Writepin(GPIOA, LED_0, GPIO_PIN_SET);
 			GPIO_Writepin(GPIOA, LED_1, GPIO_PIN_SET);
