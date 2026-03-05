@@ -214,7 +214,7 @@ void ENZ_PULSE_EVENTS(void)
 }
 
 /* ────────────────────────────────────────────────────────────── /
- * Function : SerialNumConvToStr()
+ * Function : ENZ_TestJig_CONFIG()
  * Purpose  : Converts int64 to str
  * Details  : Changes the DRUIDx serial numbers to string
  * Runtime  : ~X.Xxx
